@@ -1,0 +1,795 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scripts do Cartório · NoCartório</title>
+<meta name="description" content="Instalação e instruções dos scripts de apoio ao NoCartório: Tampermonkey, instalação com um clique e atualização automática.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23c2410c'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23fff' stroke-width='2.5' stroke-dasharray='3 4'/%3E%3Cpath d='M22 33l7 7 14-16' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<a class="skip" href="#scripts">Pular para os scripts</a>
+
+<header class="top">
+  <div class="wrap top-in">
+    <a class="brand" href="#inicio" aria-label="Scripts do Cartório, início">
+      <svg class="seal" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="30" class="seal-bg"/>
+        <circle cx="32" cy="32" r="22" class="seal-ring"/>
+        <path d="M22 33l7 7 14-16" class="seal-check"/>
+      </svg>
+      <span>Scripts do Cartório</span>
+    </a>
+    <nav class="nav" aria-label="Seções">
+      <a href="#tampermonkey">Tampermonkey</a>
+      <a href="#scripts">Scripts</a>
+      <a href="#atualizacoes">Atualizações</a>
+      <a href="#ajuda">Ajuda</a>
+    </nav>
+  </div>
+</header>
+
+<main id="inicio">
+
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Ferramentas para o NoCartório</p>
+      <h1>Botões e atalhos a mais no NoCartório, instalados com um clique.</h1>
+      <p class="lead">Cada script acrescenta uma função ao sistema, direto no seu navegador. Você instala uma vez e as versões novas chegam sozinhas.</p>
+      <ol class="path" aria-label="Resumo da instalação">
+        <li><a href="#tampermonkey"><b>1</b><span>Instale o Tampermonkey<small>uma vez por navegador</small></span></a></li>
+        <li><a href="#scripts"><b>2</b><span>Clique em Instalar<small>no script que quiser</small></span></a></li>
+        <li><a href="#scripts"><b>3</b><span>Recarregue o NoCartório<small>tecla F5</small></span></a></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================================================ TAMPERMONKEY -->
+  <section class="sec" id="tampermonkey">
+    <div class="wrap">
+      <header class="sec-h">
+        <span class="num">1</span>
+        <div>
+          <h2>Instale o Tampermonkey</h2>
+          <p>É a extensão gratuita que faz os scripts funcionarem. Só precisa ser instalada uma vez em cada navegador.</p>
+        </div>
+      </header>
+
+      <div class="tabs" data-tabs>
+        <input type="radio" name="nav" id="nav-chrome" checked>
+        <label for="nav-chrome">Google Chrome</label>
+        <input type="radio" name="nav" id="nav-edge">
+        <label for="nav-edge">Microsoft Edge</label>
+        <input type="radio" name="nav" id="nav-firefox">
+        <label for="nav-firefox">Firefox</label>
+
+        <div class="panel" data-panel="chrome">
+          <ol class="steps">
+            <li>
+              <h3>Adicione a extensão</h3>
+              <p>Abra a página do Tampermonkey na loja do Chrome, clique em <span class="ui">Usar no Chrome</span> e depois em <span class="ui">Adicionar extensão</span>.</p>
+              <p><a class="btn" href="https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank" rel="noopener">Abrir a loja do Chrome ↗</a></p>
+            </li>
+            <li>
+              <h3>Libere os scripts de usuário</h3>
+              <p>Sem este passo, os scripts ficam instalados mas não fazem nada. É o que mais se esquece.</p>
+              <ul>
+                <li>Clique com o <b>botão direito</b> no ícone do Tampermonkey (ao lado da barra de endereço; se não estiver à vista, clique antes no ícone de quebra-cabeça) e escolha <span class="ui">Gerenciar extensão</span>.</li>
+                <li>Na página que abrir, ligue a chave <span class="ui">Permitir scripts de usuário</span> (em inglês, <i>Allow User Scripts</i>).</li>
+              </ul>
+              <p class="note">Não achou essa chave? Seu Chrome é mais antigo. Digite <button type="button" class="copy-inline" data-copy="chrome://extensions">chrome://extensions</button> na barra de endereço e ligue <span class="ui">Modo do desenvolvedor</span>, no canto superior direito.</p>
+            </li>
+            <li>
+              <h3>Deixe o ícone à vista <span class="opt">opcional</span></h3>
+              <p>Clique no ícone de quebra-cabeça e depois no alfinete ao lado de Tampermonkey. O ícone mostra quantos scripts estão ativos na página aberta.</p>
+            </li>
+          </ol>
+        </div>
+
+        <div class="panel" data-panel="edge">
+          <ol class="steps">
+            <li>
+              <h3>Adicione a extensão</h3>
+              <p>Abra a página do Tampermonkey na loja do Edge, clique em <span class="ui">Obter</span> e depois em <span class="ui">Adicionar extensão</span>.</p>
+              <p><a class="btn" href="https://microsoftedge.microsoft.com/addons/detail/tampermonkey/iikmkjmpaadaobahmlepeloendndfphd" target="_blank" rel="noopener">Abrir a loja do Edge ↗</a></p>
+            </li>
+            <li>
+              <h3>Libere os scripts de usuário</h3>
+              <p>Sem este passo, os scripts ficam instalados mas não fazem nada.</p>
+              <ul>
+                <li>Digite <button type="button" class="copy-inline" data-copy="edge://extensions">edge://extensions</button> na barra de endereço.</li>
+                <li>No Tampermonkey, clique em <span class="ui">Detalhes</span> e ligue <span class="ui">Permitir scripts de usuário</span>.</li>
+              </ul>
+              <p class="note">Não achou essa chave? Na mesma página <code>edge://extensions</code>, ligue <span class="ui">Modo de desenvolvedor</span>, no menu à esquerda.</p>
+            </li>
+            <li>
+              <h3>Deixe o ícone à vista <span class="opt">opcional</span></h3>
+              <p>Clique no ícone de quebra-cabeça e depois no olho ao lado de Tampermonkey.</p>
+            </li>
+          </ol>
+        </div>
+
+        <div class="panel" data-panel="firefox">
+          <ol class="steps">
+            <li>
+              <h3>Adicione a extensão</h3>
+              <p>Abra a página do Tampermonkey nos complementos do Firefox, clique em <span class="ui">Adicionar ao Firefox</span> e confirme em <span class="ui">Adicionar</span>.</p>
+              <p><a class="btn" href="https://addons.mozilla.org/pt-BR/firefox/addon/tampermonkey/" target="_blank" rel="noopener">Abrir os complementos do Firefox ↗</a></p>
+            </li>
+            <li>
+              <h3>Pronto</h3>
+              <p>No Firefox não há permissão extra para ligar. Pode seguir para os scripts.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+
+      <p class="aside">Já usa o Violentmonkey? Também funciona: os botões de instalar desta página abrem nele do mesmo jeito.</p>
+    </div>
+  </section>
+
+  <!-- ============================================================ SCRIPTS -->
+  <section class="sec" id="scripts">
+    <div class="wrap">
+      <header class="sec-h">
+        <span class="num">2</span>
+        <div>
+          <h2>Escolha e instale os scripts</h2>
+          <p>Clique em <b>Instalar</b>: o Tampermonkey abre uma aba mostrando o script. Confirme em <span class="ui">Instalar</span> e recarregue o NoCartório com <kbd>F5</kbd>.</p>
+        </div>
+      </header>
+
+      <p class="callout">Apareceu uma página cheia de código em vez da tela de instalação? O Tampermonkey não está instalado ou está desligado neste navegador. Volte ao <a href="#tampermonkey">passo 1</a>.</p>
+
+      <div class="grid">
+
+        <article class="card" id="cadastro-unificado">
+          <div class="card-top"><span class="tag">Atos</span><span class="ver" data-version="nocartorio-cadastro-unificado.user.js"></span></div>
+          <h3>Cadastro unificado</h3>
+          <p>Edita, cria e vincula numa tela só os documentos de todas as partes de um ato, com uma única revisão antes de gravar.</p>
+          <p class="where"><b>Onde aparece</b> Nas telas de um ato, botão <span class="ui">Cadastro unificado</span> ou <kbd>Alt</kbd>+<kbd>U</kbd>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-cadastro-unificado.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-cadastro-unificado">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="ficha">
+          <div class="card-top"><span class="tag">Atos</span><span class="ver" data-version="nocartorio-ficha-unificada.user.js"></span></div>
+          <h3>Ficha no cadastro unificado</h3>
+          <p>Recebe a ficha que a IA gera a partir da minuta e abre tudo já preenchido no Cadastro unificado: pessoas, matrículas, papéis e documentos.</p>
+          <p class="where"><b>Onde aparece</b> Na tela do serviço ou do ato, botão <span class="ui">Importar ficha</span> ou <kbd>Alt</kbd>+<kbd>I</kbd>.</p>
+          <p class="needs">Precisa do Cadastro unificado instalado e da skill na IA. O passo a passo está em <b>Como usar</b>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-ficha-unificada.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-ficha">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="anexos">
+          <div class="card-top"><span class="tag">Atos</span><span class="ver" data-version="nocartorio-anexos-mosaico.user.js"></span></div>
+          <h3>Anexos em mosaico</h3>
+          <p>Mostra os documentos de todas as partes lado a lado para você arrastar imagens e PDFs para cada um e enviar tudo de uma vez.</p>
+          <p class="where"><b>Onde aparece</b> Nas telas de um ato, botão <span class="ui">Anexar arquivos</span>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-anexos-mosaico.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-anexos">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="trello">
+          <div class="card-top"><span class="tag">Protocolo</span><span class="ver" data-version="nocartorio-trello.user.js"></span></div>
+          <h3>NoCartório → Trello</h3>
+          <p>Mostra se o protocolo já tem cartão no Trello e onde ele está. Cria o cartão com quadro, coluna, etiqueta, responsável e prazo em dias úteis, e edita o que já existe.</p>
+          <p class="where"><b>Onde aparece</b> Na tela do protocolo (Serviços › Visualizar), botão <span class="ui">Trello</span>.</p>
+          <p class="needs">Precisa conectar ao Trello na primeira vez. O passo a passo está em <b>Como usar</b>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-trello.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-trello">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="datas-selos">
+          <div class="card-top"><span class="tag">Protocolo</span><span class="ver" data-version="nocartorio-datas-selos.user.js"></span></div>
+          <h3>Datas dos selos</h3>
+          <p>Escreve, abaixo de cada selo, a data e a hora em que o serviço foi protocolado e em que o ato foi registrado.</p>
+          <p class="where"><b>Onde aparece</b> Na tela do protocolo, sozinho. Não tem botão.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-datas-selos.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-datas-selos">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="matricula">
+          <div class="card-top"><span class="tag">Registro de Imóveis</span><span class="ver" data-version="nocartorio-matricula-cronologica.user.js"></span></div>
+          <h3>Matrícula em ordem cronológica</h3>
+          <p>Junta todos os atos de uma matrícula num texto corrido, do mais antigo ao mais recente, pronto para copiar ou imprimir.</p>
+          <p class="where"><b>Onde aparece</b> No Livro de Registro Geral, botão <span class="ui">⇅ Ordem cronológica</span>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-matricula-cronologica.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-matricula">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="protesto">
+          <div class="card-top"><span class="tag">Protesto</span><span class="ver" data-version="busca-protesto.user.js"></span></div>
+          <h3>Busca Protesto</h3>
+          <p>Buscador do Livro de Protocolos: por nome, CPF ou CNPJ, número do título ou nosso número e número de ordem, com exportação para planilha.</p>
+          <p class="where"><b>Onde aparece</b> No Livro de Protocolos do protesto, botão redondo com lupa ou <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/busca-protesto.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-protesto">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="tema">
+          <div class="card-top"><span class="tag">Aparência</span><span class="ver" data-version="nocartorio-skin.user.js"></span></div>
+          <h3>Tema Barbie / Hot Wheels</h3>
+          <p>Troca as cores do NoCartório por um tema rosa ou um tema de corrida. Muda só a aparência, e só no seu navegador.</p>
+          <p class="where"><b>Onde aparece</b> Em todas as telas, num seletor flutuante de tema.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-skin.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-tema">Como usar</button>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ ATUALIZAÇÕES -->
+  <section class="sec" id="atualizacoes">
+    <div class="wrap">
+      <header class="sec-h">
+        <span class="num">3</span>
+        <div>
+          <h2>Atualizações</h2>
+          <p>Os scripts instalados por esta página se atualizam sozinhos. Você não precisa voltar aqui.</p>
+        </div>
+      </header>
+
+      <div class="cols">
+        <div>
+          <h3>Como funciona</h3>
+          <p>O Tampermonkey consulta esta página periodicamente (por padrão, uma vez por dia). Quando há versão nova, ele baixa e troca o script sem perguntar. Suas configurações, como a conexão com o Trello, são mantidas.</p>
+          <p>O número ao lado de cada script acima é a versão publicada agora.</p>
+        </div>
+        <div>
+          <h3>Quero a versão nova agora</h3>
+          <p>Clique no ícone do Tampermonkey e escolha <span class="ui">Verificar atualizações de scripts</span> (em inglês, <i>Check for userscript updates</i>). Depois recarregue o NoCartório com <kbd>F5</kbd>.</p>
+          <p>Outra forma: clique de novo em <b>Instalar</b> nesta página. O Tampermonkey mostra a versão instalada e a nova, e o botão vira <span class="ui">Atualizar</span>.</p>
+        </div>
+        <div>
+          <h3>Instalei antes de existir esta página</h3>
+          <p>Scripts instalados por copiar e colar não sabem de onde se atualizar. Clique em <b>Instalar</b> aqui uma vez (o botão aparece como <span class="ui">Reinstalar</span> ou <span class="ui">Atualizar</span>). As configurações são mantidas e, daí em diante, a atualização é automática.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================ AJUDA -->
+  <section class="sec" id="ajuda">
+    <div class="wrap">
+      <header class="sec-h">
+        <span class="num">?</span>
+        <div>
+          <h2>Se algo não funcionar</h2>
+        </div>
+      </header>
+
+      <div class="faq">
+        <details>
+          <summary>Instalei, mas o botão não aparece no NoCartório</summary>
+          <ol>
+            <li>Recarregue a página do NoCartório com <kbd>F5</kbd>. Abas que já estavam abertas não recebem o script sozinhas.</li>
+            <li>No Chrome ou no Edge, confira se a chave <span class="ui">Permitir scripts de usuário</span> está ligada (<a href="#tampermonkey">passo 1</a>). É a causa mais comum.</li>
+            <li>Clique no ícone do Tampermonkey com o NoCartório aberto: o script deve aparecer na lista com a chave ligada.</li>
+            <li>Confira se você está na tela certa. Cada script só aparece onde faz sentido; veja <b>Onde aparece</b> em cada cartão acima.</li>
+          </ol>
+        </details>
+        <details>
+          <summary>Cliquei em Instalar e abriu uma página cheia de código</summary>
+          <p>O navegador abriu o arquivo como texto porque o Tampermonkey não está instalado, está desligado ou é outro navegador ou perfil. Faça o <a href="#tampermonkey">passo 1</a> neste navegador e clique em Instalar de novo.</p>
+        </details>
+        <details>
+          <summary>Apareceram dois botões iguais</summary>
+          <p>O mesmo script está instalado duas vezes, em geral uma cópia antiga colada à mão e a nova. Clique no ícone do Tampermonkey, abra o <span class="ui">Painel de controle</span> (em inglês, <i>Dashboard</i>) e remova a mais antiga, pela lixeira.</p>
+        </details>
+        <details>
+          <summary>Como desligo ou removo um script?</summary>
+          <p>Clique no ícone do Tampermonkey com o NoCartório aberto e desligue a chave do script para pausar. Para remover de vez, abra o <span class="ui">Painel de controle</span> e clique na lixeira.</p>
+        </details>
+        <details>
+          <summary>O script parou de funcionar depois de uma mudança no NoCartório</summary>
+          <p>Os scripts dependem das telas do NoCartório. Quando o sistema muda, pode ser preciso uma versão nova. Avise quem mantém os scripts no cartório e, quando a correção sair, ela chega pela atualização automática.</p>
+        </details>
+        <details>
+          <summary>O que esses scripts acessam?</summary>
+          <p>Todos funcionam só dentro do NoCartório e usam a sessão em que você já está logado. O único que conversa com outro serviço é o do Trello, que fala com o próprio Trello usando a autorização que você der.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Scripts de uso interno do cartório. Não são um produto oficial da NoCartório.</p>
+  </div>
+</footer>
+
+<!-- ============================================================ GUIAS -->
+
+<dialog class="guide" id="guia-cadastro-unificado" aria-labelledby="t-cadastro">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-cadastro">Cadastro unificado</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Em vez de abrir parte por parte e documento por documento, você vê o ato inteiro numa tela, preenche o que falta e grava tudo com uma revisão só.</p>
+    <ol class="steps">
+      <li>
+        <h3>Abra um ato</h3>
+        <p>Pode ser a tela de edição do ato ou a de qualquer parte dele. O botão laranja <span class="ui">Cadastro unificado</span> aparece no canto inferior direito. O atalho é <kbd>Alt</kbd>+<kbd>U</kbd>.</p>
+      </li>
+      <li>
+        <h3>Confira as partes</h3>
+        <p>O painel carrega todas as partes, agrupadas por pessoa, empresa ou imóvel. Se a mesma pessoa está em dois papéis, os documentos dela aparecem uma vez só.</p>
+      </li>
+      <li>
+        <h3>Preencha, crie ou vincule</h3>
+        <ul>
+          <li>Documentos já cadastrados abrem para edição.</li>
+          <li>Os que faltam têm o botão <span class="ui">Criar</span>.</li>
+          <li>Se a pessoa já tem um documento daquele tipo, o cartão oferece <span class="ui">Vincular</span> em vez de criar outro.</li>
+          <li><b>Campos em comum</b> junta o que se repete em vários documentos da mesma pessoa (endereço, nome, lote, quadra) e deixa aplicar um valor a todos. Nada é copiado sozinho.</li>
+        </ul>
+      </li>
+      <li>
+        <h3>Revise e grave</h3>
+        <p>Clique em <span class="ui">Revisar e salvar</span> (ou <kbd>Ctrl</kbd>+<kbd>S</kbd>). Aparece o resumo de tudo que vai mudar. Ao confirmar, o script grava, recarrega e mostra o resultado de cada item.</p>
+      </li>
+    </ol>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Quer ver o que seria enviado sem gravar? Marque <span class="ui">Simular (não grava)</span> no topo do painel.</li>
+      <li>Se alguém alterou o documento depois que você abriu o painel, o script não grava por cima: ele avisa do conflito.</li>
+      <li>Não envia anexos. Para isso use o <b>Anexos em mosaico</b>.</li>
+      <li>Não altera campos-chave de documentos já cadastrados (na NoCartório isso é feito em “editar chaves”).</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-ficha" aria-labelledby="t-ficha">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar e instalar a skill</p><h2 id="t-ficha">Ficha no cadastro unificado</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">A IA lê a minuta e os PDFs e devolve uma <b>ficha</b>: um texto em formato JSON com as partes, os papéis e os dados de cada documento. Você cola essa ficha no NoCartório e o cadastro abre preenchido para revisar.</p>
+
+    <div class="g-flow" aria-label="Resumo do fluxo">
+      <span>Minuta e PDFs</span><i>→</i><span>IA com a skill</span><i>→</i><span>Ficha</span><i>→</i><span>Importar ficha</span><i>→</i><span>Cadastro unificado</span>
+    </div>
+
+    <h3 class="g-part"><span>Parte A</span> Instale os dois scripts</h3>
+    <p>A ficha depende do <b>Cadastro unificado</b>, que é quem grava. Instale os dois e recarregue o NoCartório.</p>
+    <p class="g-actions">
+      <a class="btn" href="scripts/nocartorio-cadastro-unificado.user.js">Instalar Cadastro unificado</a>
+      <a class="btn" href="scripts/nocartorio-ficha-unificada.user.js">Instalar Ficha no cadastro unificado</a>
+    </p>
+
+    <h3 class="g-part"><span>Parte B</span> Instale a skill na IA</h3>
+    <p>A skill é um arquivo de instruções que ensina a IA a montar a ficha no formato certo. Instala-se uma vez por conta.</p>
+    <p class="note">Minutas e documentos têm dados pessoais. Use a conta de IA que o cartório autorizou para esse tipo de documento.</p>
+
+    <details class="acc" open>
+      <summary>No Claude <span class="opt">recomendado</span></summary>
+      <ol class="steps">
+        <li>
+          <h3>Baixe a skill</h3>
+          <p>Guarde o arquivo <code>.zip</code> como veio. Não precisa descompactar.</p>
+          <p><a class="btn primary" href="skill/ficha-cadastro-unificado.zip" download>Baixar a skill (.zip)</a></p>
+        </li>
+        <li>
+          <h3>Confirme que a criação de arquivos está ligada</h3>
+          <p>Em <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>, clique no seu nome (canto inferior esquerdo) e abra <span class="ui">Settings</span> › <span class="ui">Capabilities</span> (em português, Configurações › Recursos). A opção <span class="ui">Code execution and file creation</span>, que em algumas contas aparece como <span class="ui">Create and edit files</span>, precisa estar ligada. Sem ela as skills não funcionam.</p>
+          <p class="note">Conta Team ou Enterprise do cartório? Quem libera é o administrador, em <i>Organization settings › Plugins &amp; skills</i>.</p>
+        </li>
+        <li>
+          <h3>Envie o arquivo</h3>
+          <ul>
+            <li>No menu lateral, abra <span class="ui">Customize</span> (Personalizar) e depois <span class="ui">Skills</span>.</li>
+            <li>Clique no <span class="ui">+</span> e em <span class="ui">+ Create skill</span>.</li>
+            <li>Escolha <span class="ui">Upload a skill</span> e selecione o <code>.zip</code> que você baixou.</li>
+          </ul>
+        </li>
+        <li>
+          <h3>Confira</h3>
+          <p>A skill <b>ficha-cadastro-unificado</b> aparece na lista com a chave ligada. Pronto: o Claude passa a usá-la sozinho quando você pedir uma ficha.</p>
+        </li>
+      </ol>
+    </details>
+
+    <details class="acc">
+      <summary>No ChatGPT</summary>
+      <ol class="steps">
+        <li>
+          <h3>Baixe a skill</h3>
+          <p>É o mesmo arquivo usado no Claude.</p>
+          <p><a class="btn" href="skill/ficha-cadastro-unificado.zip" download>Baixar a skill (.zip)</a></p>
+        </li>
+        <li>
+          <h3>Envie o arquivo</h3>
+          <p>No ChatGPT, abra <span class="ui">Skills</span>, clique em <span class="ui">Create</span> e escolha <span class="ui">Upload from your computer</span>. Selecione o <code>.zip</code>. O ChatGPT verifica o arquivo antes de liberar.</p>
+          <p class="note">Os nomes dos menus mudam com frequência e, em contas de equipe, o envio de skills pode depender do administrador. Se não achar a opção, use o jeito abaixo, que funciona em qualquer IA.</p>
+        </li>
+      </ol>
+    </details>
+
+    <details class="acc">
+      <summary>Em outras IAs (Gemini, Copilot…) ou se o envio não funcionar</summary>
+      <p>Toda skill é, no fundo, um texto de instruções. Dá para entregá-lo à IA de outro jeito:</p>
+      <ol class="steps">
+        <li>
+          <h3>Copie as instruções</h3>
+          <p>
+            <button type="button" class="btn primary" data-copy-src="skill/ficha-cadastro-unificado/SKILL.md" data-copy-label="Instruções copiadas">Copiar as instruções da skill</button>
+            <a class="btn" href="skill/ficha-cadastro-unificado/SKILL.md" download="ficha-cadastro-unificado.md">Baixar como arquivo</a>
+          </p>
+          <div class="copy-fallback" hidden></div>
+        </li>
+        <li>
+          <h3>Cole onde a IA guarda instruções</h3>
+          <ul>
+            <li><b>Gemini:</b> crie um Gem (Gems › Novo Gem) e cole no campo de instruções.</li>
+            <li><b>ChatGPT:</b> crie um Projeto ou um GPT e cole nas instruções.</li>
+            <li><b>Qualquer outra:</b> cole no começo da conversa, ou anexe o arquivo, e peça: “siga estas instruções para gerar a ficha”.</li>
+          </ul>
+        </li>
+      </ol>
+    </details>
+
+    <h3 class="g-part"><span>Parte C</span> No dia a dia</h3>
+    <ol class="steps">
+      <li>
+        <h3>Peça a ficha à IA</h3>
+        <p>Numa conversa, anexe a minuta, o título e os PDFs dos documentos e peça:</p>
+        <p class="say">gera a ficha do protocolo A-XXXX-0000000000</p>
+        <p>Informar o código do serviço é opcional, mas ajuda: o script avisa se a ficha for colada no serviço errado.</p>
+      </li>
+      <li>
+        <h3>Copie a ficha</h3>
+        <p>A IA responde com um bloco de código que começa com <code>{ "ficha_versao": 1</code>. Use o botão de copiar do próprio bloco, ou baixe o arquivo <code>.json</code> se ela oferecer. Leia também o resumo que vem embaixo: ele lista o que ficou de fora e as divergências encontradas.</p>
+      </li>
+      <li>
+        <h3>Importe no NoCartório</h3>
+        <p>Na tela do serviço ou do ato, clique em <span class="ui">Importar ficha</span> (ou <kbd>Alt</kbd>+<kbd>I</kbd>). Use <span class="ui">Colar da área de transferência</span>, ou <span class="ui">Abrir arquivo .json</span>, e depois <span class="ui">Ler ficha</span>.</p>
+      </li>
+      <li>
+        <h3>Faça a conferência</h3>
+        <p>O script procura cada pessoa pelo CPF ou CNPJ e cada imóvel pela matrícula, e mostra quem já está no ato, quem tem cadastro mas ainda não está no ato e quem é novo. Confira o ato escolhido e os papéis de cada um; dá para trocar, tirar e pôr.</p>
+      </li>
+      <li>
+        <h3>Abra no cadastro unificado, revise e grave</h3>
+        <p>Clique em <span class="ui">Abrir no cadastro unificado</span>. Os campos vindos da ficha trazem o selo “ficha” (ou “calculado”) e a fonte de cada dado. Onde já havia outro valor, nada é trocado: aparece “Ficha: … usar” para você decidir. Termine em <span class="ui">Revisar e salvar</span>.</p>
+      </li>
+    </ol>
+
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Nada é gravado sem a sua revisão. O script da ficha só lê; quem grava é o Cadastro unificado.</li>
+      <li>A IA só coloca na ficha o que está escrito nos documentos. Campo sem dado fica vazio para você preencher.</li>
+      <li>Matrícula que ainda não tem cadastro na NoCartório não é criada pela ficha: o script aponta o termo no Livro Indicador Real.</li>
+      <li>A ficha fica guardada só na aba aberta, até você descartar ou fechar.</li>
+    </ul>
+
+    <details class="acc">
+      <summary>Para quem mantém a skill: atualizar o catálogo de documentos</summary>
+      <p>A skill conhece os tipos de documento mais usados. Para ela conhecer todos os tipos e campos da NoCartório:</p>
+      <ol>
+        <li>No NoCartório, abra um serviço, clique em <span class="ui">Importar ficha</span> › <span class="ui">Exportar catálogo</span> › <span class="ui">Gerar e baixar</span>.</li>
+        <li>Leve o arquivo <code>catalogo-nocartorio.md</code> a uma conversa no Claude e peça: “atualize a skill ficha-cadastro-unificado com este catálogo”.</li>
+        <li>Salve a skill atualizada que o Claude propuser. Para os colegas receberem, o arquivo da skill desta página também precisa ser trocado.</li>
+      </ol>
+    </details>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-anexos" aria-labelledby="t-anexos">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-anexos">Anexos em mosaico</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Todos os documentos ativos de todas as partes aparecem como cartões. Você distribui os arquivos entre eles e envia tudo no final.</p>
+    <ol class="steps">
+      <li>
+        <h3>Abra um ato e clique em Anexar arquivos</h3>
+        <p>O botão <span class="ui">Anexar arquivos</span> fica no canto inferior direito, acima do Cadastro unificado.</p>
+      </li>
+      <li>
+        <h3>Traga os arquivos</h3>
+        <ul>
+          <li>Arraste do computador direto para o cartão do documento, ou clique no cartão para escolher.</li>
+          <li>Tem muitos de uma vez? Solte vários arquivos ou uma pasta inteira na <b>Bandeja</b>, no topo, e distribua depois.</li>
+          <li>Copiou uma imagem ou um print? <kbd>Ctrl</kbd>+<kbd>V</kbd> cola no cartão que estiver sob o mouse (ou na Bandeja).</li>
+        </ul>
+      </li>
+      <li>
+        <h3>Distribua</h3>
+        <p>Arraste as miniaturas de um cartão para outro. Um clique seleciona várias; duplo clique abre o arquivo em tamanho grande, onde as teclas <kbd>1</kbd> a <kbd>9</kbd> mandam para o destino numerado, <kbd>0</kbd> devolve à Bandeja e as setas passam para o próximo.</p>
+      </li>
+      <li>
+        <h3>Envie</h3>
+        <p>Clique em <span class="ui">Salvar</span>. Só nesse momento os arquivos são enviados, um por vez. Se algum falhar, ele continua na fila marcado com “!”; passe o mouse para ver o motivo.</p>
+      </li>
+    </ol>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Aceita imagens e PDF. O cartão “Imagens da parte” aceita só imagens.</li>
+      <li>O que ficar na Bandeja não é enviado.</li>
+      <li>Fechar o painel não perde a fila enquanto a página estiver aberta. <span class="ui">Descartar fila</span> esvazia tudo.</li>
+      <li>Criou um documento agora e ele não apareceu? Clique em <span class="ui">Recarregar</span>.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-trello" aria-labelledby="t-trello">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar e conectar</p><h2 id="t-trello">NoCartório → Trello</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Na primeira vez é preciso ligar o script à sua conta do Trello. São uns dois minutos, uma vez por navegador. Depois é só usar.</p>
+
+    <h3 class="g-part"><span>Parte A</span> Conectar ao Trello</h3>
+    <p>Antes de começar: entre no <a href="https://trello.com" target="_blank" rel="noopener">Trello</a> com a sua conta e confira se você enxerga os quadros do cartório. Se não enxerga, peça para ser adicionado.</p>
+
+    <ol class="steps">
+      <li>
+        <h3>Abra o painel do script</h3>
+        <p>No NoCartório, abra qualquer protocolo (Serviços › Visualizar) e clique no botão azul <span class="ui">Trello</span>, à direita da tela. Sem conexão ainda, ele já abre nas configurações.</p>
+      </li>
+      <li>
+        <h3>Copie a configuração do cartório</h3>
+        <p>Ela traz a chave de acesso do cartório, os feriados municipais e os quadros que não são usados. Não traz senha nem token de ninguém.</p>
+        <p><button type="button" class="btn primary" data-copy-src="config/trello.json" data-copy-label="Configuração copiada">Copiar a configuração do cartório</button></p>
+        <div class="copy-fallback" hidden></div>
+      </li>
+      <li>
+        <h3>Cole no script</h3>
+        <p>No painel, role até <b>Levar para outra máquina</b>, clique em <span class="ui">Colar configuração…</span>, cole com <kbd>Ctrl</kbd>+<kbd>V</kbd> na caixa que abrir e clique em <span class="ui">Importar</span>. Aparece “Configuração importada”.</p>
+      </li>
+      <li>
+        <h3>Gere o seu token</h3>
+        <p>De volta ao topo do painel, o campo <b>Chave da API</b> já está preenchido. Clique em <span class="ui">Gerar token no Trello</span>. Abre uma aba do Trello pedindo autorização para “NoCartório → Trello”:</p>
+        <ul>
+          <li>confira, no alto da página, se a conta é a sua;</li>
+          <li>role até o fim e clique em <span class="ui">Permitir</span>;</li>
+          <li>o Trello mostra um texto comprido que começa com <code>ATTA</code>. Esse é o token: selecione tudo e copie.</li>
+        </ul>
+      </li>
+      <li>
+        <h3>Cole o token e teste</h3>
+        <p>Volte à aba do NoCartório, cole no campo <b>Token</b> e clique em <span class="ui">Salvar e testar</span>. Tem que aparecer “Conectado como <i>seu nome</i> — <i>N</i> quadros”.</p>
+      </li>
+      <li>
+        <h3>Confira os quadros</h3>
+        <p>Em <b>Quadros usados</b>, deixe marcados só os quadros em que você trabalha: são eles que aparecem na hora de criar e onde o script procura cartões. Depois clique em <span class="ui">← Voltar ao protocolo</span>.</p>
+      </li>
+    </ol>
+
+    <div class="g-boxes">
+      <div class="g-box">
+        <h4>Qual conta usar?</h4>
+        <p>Os cartões e comentários saem em nome da conta que gerou o token. Use a sua, a não ser que o cartório tenha combinado uma conta única para criar os cartões.</p>
+      </div>
+      <div class="g-box">
+        <h4>O token é como uma senha</h4>
+        <p>Não mande por e-mail nem por mensagem. Ele fica guardado só neste navegador. Para cancelar um token, no Trello vá em Configurações › Aplicativos e revogue “NoCartório → Trello”.</p>
+      </div>
+    </div>
+
+    <details class="acc">
+      <summary>Deu erro ao testar</summary>
+      <ul>
+        <li><b>“O Trello recusou a chave/token”:</b> o token foi copiado pela metade ou foi gerado com outra chave. Clique de novo em <span class="ui">Gerar token no Trello</span> e copie o texto inteiro.</li>
+        <li><b>Conectou, mas com zero quadros ou faltando quadros:</b> a conta que autorizou não participa dos quadros do cartório. Peça para ser adicionado e clique em <span class="ui">Salvar e testar</span> outra vez.</li>
+        <li><b>O botão Trello não aparece:</b> ele só existe na tela de um protocolo. Para abrir as configurações de qualquer tela, clique no ícone do Tampermonkey e escolha <span class="ui">Trello: configurações</span>.</li>
+      </ul>
+    </details>
+
+    <details class="acc">
+      <summary>Usar em outro computador</summary>
+      <p>Repita os passos acima no outro navegador. Ou, no computador já configurado, abra as configurações e clique em <span class="ui">Copiar configuração</span>: essa cópia leva também o seu token e o que o script aprendeu das suas escolhas. Por conter o token, passe só para você mesmo.</p>
+    </details>
+
+    <details class="acc">
+      <summary>Não tenho a configuração do cartório (criar a chave do zero)</summary>
+      <p>Só é preciso uma vez por cartório, por quem administra a área de trabalho no Trello:</p>
+      <ol>
+        <li>Abra a página de administração de Power-Ups do Trello (<code>trello.com/power-ups/admin</code>) e crie um Power-Up na área de trabalho do cartório. O nome é livre, por exemplo “NoCartório”.</li>
+        <li>Abra o Power-Up criado e, na aba da chave de API, clique em <span class="ui">Generate a new API key</span>.</li>
+        <li>Copie a chave (32 caracteres), cole no campo <b>Chave da API</b> do script e siga a partir do passo 4 acima.</li>
+      </ol>
+    </details>
+
+    <h3 class="g-part"><span>Parte B</span> No dia a dia</h3>
+    <ol class="steps">
+      <li>
+        <h3>Abra o protocolo e clique em Trello</h3>
+        <p>O painel mostra os dados do protocolo e, em <b>Já existe no Trello?</b>, procura o número dele nos títulos dos cartões dos seus quadros. Se quiser, clique em <span class="ui">Procurar também nos arquivados</span>.</p>
+      </li>
+      <li>
+        <h3>Se não existe, crie o cartão</h3>
+        <p>O formulário já vem sugerido. Confira e ajuste:</p>
+        <ul>
+          <li><b>Quadro e coluna.</b> O script lembra o que você escolheu para cada tipo de ato.</li>
+          <li><b>Modelo.</b> Se o quadro tem um cartão modelo chamado “PROTOCOLO”, o checklist e a descrição dele são copiados.</li>
+          <li><b>Etiqueta do ato</b> (sugerida pelo nome do ato) e <b>outras etiquetas</b>, como SAEC ou Malote.</li>
+          <li><b>Responsável</b>, sugerido a partir do assinante do protocolo.</li>
+          <li><b>Prazo em dias úteis</b>, que pula fins de semana e feriados.</li>
+          <li><b>Anexos</b> e <b>comentário inicial</b>, se quiser. No Trello gratuito cada arquivo pode ter até 10 MB.</li>
+        </ul>
+        <p>Termine em <span class="ui">Criar cartão</span>.</p>
+      </li>
+      <li>
+        <h3>Se já existe, veja onde está e edite</h3>
+        <p>O painel mostra o quadro, a coluna e a posição do cartão, com o link <span class="ui">Abrir no Trello ↗</span>. Dali mesmo dá para mover de coluna ou de quadro, marcar como concluído, mudar o prazo, as etiquetas e os responsáveis, marcar itens do checklist, anexar arquivos e comentar.</p>
+      </li>
+    </ol>
+
+    <h3 class="g-sub">Feriados</h3>
+    <p>Sábados, domingos, feriados nacionais e Sexta-feira Santa nunca contam como dia útil. Nas configurações, em <b>Prazos — feriados</b>, você liga ou desliga Carnaval e Corpus Christi e escreve os feriados locais, um por linha: <code>24/06 São João</code> vale todo ano; <code>24/06/2027 Ponto facultativo</code> vale só naquele ano. A configuração do cartório já traz os municipais.</p>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-datas-selos" aria-labelledby="t-selos">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-selos">Datas dos selos</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Não há o que fazer: depois de instalado, ele trabalha sozinho.</p>
+    <ol class="steps">
+      <li>
+        <h3>Abra um protocolo</h3>
+        <p>Na tela do serviço (Serviços › Visualizar), olhe a lista de atos.</p>
+      </li>
+      <li>
+        <h3>Leia as datas abaixo de cada selo</h3>
+        <ul>
+          <li>📅 <b>Protocolado:</b> data e hora em que o serviço foi protocolado (prenotação no livro de protocolo).</li>
+          <li>✅ <b>Registrado:</b> data e hora em que aquele ato foi praticado ou registrado.</li>
+        </ul>
+        <p>Passe o mouse sobre a linha para ver de onde a data foi tirada.</p>
+      </li>
+    </ol>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Ato ainda não registrado mostra só a data de protocolo.</li>
+      <li>O script só lê as informações da própria tela. Não grava nem envia nada.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-matricula" aria-labelledby="t-matricula">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-matricula">Matrícula em ordem cronológica</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Para ler ou conferir uma matrícula inteira sem abrir ato por ato.</p>
+    <ol class="steps">
+      <li>
+        <h3>Busque a matrícula</h3>
+        <p>No Registro de Imóveis, abra o <b>Livro de Registro Geral</b> e pesquise a matrícula como de costume.</p>
+      </li>
+      <li>
+        <h3>Clique em ⇅ Ordem cronológica</h3>
+        <p>O botão laranja fica no canto inferior direito. O script percorre todas as páginas do resultado e monta uma folha com os atos, do mais antigo ao mais recente.</p>
+      </li>
+      <li>
+        <h3>Use a barra do topo</h3>
+        <ul>
+          <li><span class="ui">Inverter ordem</span> mostra do mais recente ao mais antigo.</li>
+          <li><span class="ui">Ocultar índices</span> tira as linhas cinzas de identificação e deixa só o texto dos atos.</li>
+          <li><span class="ui">Copiar texto</span> copia com a formatação, pronto para colar no Word.</li>
+          <li><span class="ui">Imprimir</span> abre a janela de impressão. Se nada acontecer, permita pop-ups para o NoCartório.</li>
+        </ul>
+      </li>
+    </ol>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>A folha traz os atos da busca que está na tela. Se a busca tiver mais de uma matrícula, vêm todas.</li>
+      <li>O script só lê. Nada é alterado na matrícula.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-protesto" aria-labelledby="t-protesto">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-protesto">Busca Protesto</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Um buscador para o Livro de Protocolos do protesto, com mais critérios do que a tela oferece.</p>
+    <ol class="steps">
+      <li>
+        <h3>Abra o Livro de Protocolos do protesto</h3>
+        <p>O botão redondo laranja com a lupa aparece no canto inferior direito. O atalho é <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>F</kbd>.</p>
+      </li>
+      <li>
+        <h3>Preencha um ou mais campos</h3>
+        <ul>
+          <li><b>Nº de ordem:</b> número exato do apontamento.</li>
+          <li><b>Nome da pessoa</b> e <b>Função:</b> busque pelo nome e, se quiser, restrinja a apresentante, cedente, devedor ou sacador.</li>
+          <li><b>CPF / CNPJ:</b> com ou sem pontuação.</li>
+          <li><b>Nº do título / nosso número.</b></li>
+        </ul>
+      </li>
+      <li>
+        <h3>Busque</h3>
+        <p>Clique em <span class="ui">Buscar</span>. <span class="ui">Parar</span> interrompe uma busca demorada e <span class="ui">Limpar</span> zera os campos.</p>
+      </li>
+      <li>
+        <h3>Leve para a planilha</h3>
+        <p><span class="ui">⬇ CSV</span> baixa os resultados num arquivo que abre no Excel.</p>
+      </li>
+    </ol>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>A busca por número do título é lenta na primeira vez, porque o script precisa abrir os documentos de cada apontamento. O que ele lê fica guardado neste navegador por 7 dias, e as buscas seguintes ficam rápidas.</li>
+      <li>Resultado parece desatualizado? <span class="ui">Limpar cache</span> apaga o que foi guardado.</li>
+      <li>O script só consulta. Nada é alterado nos apontamentos.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-tema" aria-labelledby="t-tema">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-tema">Tema Barbie / Hot Wheels</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Assim que é instalado, o NoCartório já abre no tema Barbie. Para voltar às cores originais, <kbd>Alt</kbd>+<kbd>0</kbd>.</p>
+    <ol class="steps">
+      <li>
+        <h3>Use o seletor de tema</h3>
+        <p>Ele flutua na tela, com a palavra “tema”:</p>
+        <ul>
+          <li><span class="ui">💖 Barbie</span> e <span class="ui">🔥 Hot Wheels</span> trocam o tema na hora.</li>
+          <li><span class="ui">⨯</span> volta ao tema original do NoCartório.</li>
+          <li><span class="ui">⌄</span> esconde o seletor.</li>
+        </ul>
+      </li>
+      <li>
+        <h3>Ou use o teclado</h3>
+        <table class="keys">
+          <tr><td><kbd>Alt</kbd>+<kbd>B</kbd></td><td>Barbie</td></tr>
+          <tr><td><kbd>Alt</kbd>+<kbd>H</kbd></td><td>Hot Wheels</td></tr>
+          <tr><td><kbd>Alt</kbd>+<kbd>0</kbd></td><td>Tema original</td></tr>
+          <tr><td><kbd>Alt</kbd>+<kbd>S</kbd></td><td>Esconder ou mostrar o seletor</td></tr>
+        </table>
+        <p>Os atalhos não funcionam enquanto você digita num campo.</p>
+      </li>
+    </ol>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Muda só as cores, e só no seu navegador. Ninguém mais vê.</li>
+      <li>A escolha fica lembrada para a próxima vez.</li>
+    </ul>
+  </div>
+</dialog>
+
+<div class="toast" role="status" aria-live="polite" hidden></div>
+
+<script src="assets/app.js" defer></script>
+</body>
+</html>

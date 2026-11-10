@@ -12,6 +12,9 @@
 // @connect      api.trello.com
 // @run-at       document-idle
 // @noframes
+// @homepageURL  https://leosan14.github.io/userscript-cartorio/
+// @updateURL    https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-trello.user.js
+// @downloadURL  https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-trello.user.js
 // ==/UserScript==
 
 (function () {

@@ -8,6 +8,9 @@
 // @run-at       document-start
 // @grant        none
 // @noframes
+// @homepageURL  https://leosan14.github.io/userscript-cartorio/
+// @updateURL    https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-datas-selos.user.js
+// @downloadURL  https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-datas-selos.user.js
 // ==/UserScript==
 
 /*

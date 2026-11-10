@@ -14,6 +14,9 @@
 // @inject-into  content
 // @run-at       document-idle
 // @noframes
+// @homepageURL  https://leosan14.github.io/userscript-cartorio/
+// @updateURL    https://leosan14.github.io/userscript-cartorio/scripts/busca-protesto.user.js
+// @downloadURL  https://leosan14.github.io/userscript-cartorio/scripts/busca-protesto.user.js
 // ==/UserScript==
 
 (function () {

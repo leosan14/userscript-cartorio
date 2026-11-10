@@ -7,6 +7,9 @@
 // @match        https://app.nocartorio.com/*
 // @grant        none
 // @run-at       document-idle
+// @homepageURL  https://leosan14.github.io/userscript-cartorio/
+// @updateURL    https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-matricula-cronologica.user.js
+// @downloadURL  https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-matricula-cronologica.user.js
 // ==/UserScript==
 
 (function () {

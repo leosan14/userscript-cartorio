@@ -8,6 +8,9 @@
 // @run-at       document-idle
 // @grant        none
 // @noframes
+// @homepageURL  https://leosan14.github.io/userscript-cartorio/
+// @updateURL    https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-anexos-mosaico.user.js
+// @downloadURL  https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-anexos-mosaico.user.js
 // ==/UserScript==
 
 /*
