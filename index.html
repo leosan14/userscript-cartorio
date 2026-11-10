@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Scripts do Cartório · NoCartório</title>
-<meta name="description" content="Instalação e instruções dos scripts de apoio ao NoCartório: Tampermonkey, instalação com um clique e atualização automática.">
+<meta name="description" content="Instalação e instruções dos scripts de apoio ao NoCartório (Tampermonkey, instalação com um clique e atualização automática) e dos programas Certidão Dominial e Assistente CNIB.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="color-scheme" content="light dark">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23c2410c'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%23fff' stroke-width='2.5' stroke-dasharray='3 4'/%3E%3Cpath d='M22 33l7 7 14-16' fill='none' stroke='%23fff' stroke-width='5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
@@ -28,6 +28,7 @@
       <a href="#tampermonkey">Tampermonkey</a>
       <a href="#scripts">Scripts</a>
       <a href="#atualizacoes">Atualizações</a>
+      <a href="#programas">Programas</a>
       <a href="#ajuda">Ajuda</a>
     </nav>
   </div>
@@ -45,6 +46,7 @@
         <li><a href="#scripts"><b>2</b><span>Clique em Instalar<small>no script que quiser</small></span></a></li>
         <li><a href="#scripts"><b>3</b><span>Recarregue o NoCartório<small>tecla F5</small></span></a></li>
       </ol>
+      <p class="aside">Também há dois <a href="#programas">programas para o computador</a>, que funcionam fora do NoCartório: Certidão Dominial e Assistente CNIB.</p>
     </div>
   </section>
 
@@ -293,6 +295,63 @@
     </div>
   </section>
 
+  <!-- ============================================================ PROGRAMAS -->
+  <section class="sec" id="programas">
+    <div class="wrap">
+      <header class="sec-h">
+        <span class="num txt" aria-hidden="true">PC</span>
+        <div>
+          <h2>Programas para o computador</h2>
+          <p>Estes não usam o Tampermonkey: são programas do Windows. Você baixa o arquivo, guarda numa pasta e abre com dois cliques. A tela de cada um abre no navegador, mas tudo roda só no seu computador.</p>
+        </div>
+      </header>
+
+      <p class="callout">Na primeira vez, o Windows e o navegador podem avisar que o arquivo é desconhecido. É esperado em programas feitos no próprio cartório. O passo a passo de <b>Como instalar</b> mostra onde clicar.</p>
+
+      <div class="grid">
+
+        <article class="card" id="certidao-dominial">
+          <div class="card-top"><span class="tag">Registro de Imóveis</span><span class="ver">v1.1</span></div>
+          <h3>Certidão Dominial</h3>
+          <p>Desenha a cadeia dominial do imóvel em forma de organograma e monta a certidão dominial, vintenária, trintenária etc. em PDF/A a partir dos PDFs das certidões de inteiro teor, com todos os selos e a soma dos valores.</p>
+          <p class="where"><b>Como abre</b> Dois cliques em <code>CertidaoDominial.exe</code>. Uma janela preta fica aberta enquanto o programa roda.</p>
+          <div class="actions">
+            <a class="btn primary" href="programas/certidao-dominial/CertidaoDominial.exe" download>Baixar · 34 MB</a>
+            <button type="button" class="btn" data-guide="guia-certidao-dominial">Como instalar e usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="assistente-cnib">
+          <div class="card-top"><span class="tag">Indisponibilidade</span><span class="ver">v0.1.0</span></div>
+          <h3>Assistente CNIB</h3>
+          <p>Consulta CPF e CNPJ na CNIB 2.0 (ONR) pela API do cartório e gera pronto o texto do relatório de indisponibilidade, com resultado e hash vindos da própria ONR.</p>
+          <p class="where"><b>Como abre</b> Dois cliques em <code>AssistenteCNIB.exe</code>. Abre direto no navegador, sem janela preta.</p>
+          <p class="needs">Antes do primeiro uso, a TI cadastra as credenciais da ONR na conta de usuário de cada computador. O passo a passo está em <b>Como instalar e usar</b>.</p>
+          <div class="actions">
+            <a class="btn primary" href="programas/assistente-cnib/AssistenteCNIB.exe" download>Baixar · 13 MB</a>
+            <button type="button" class="btn" data-guide="guia-assistente-cnib">Como instalar e usar</button>
+          </div>
+        </article>
+
+      </div>
+
+      <div class="cols">
+        <div>
+          <h3>Onde guardar</h3>
+          <p>Crie uma pasta só para o programa, por exemplo <code>Documentos\Certidão Dominial</code>, e mova o arquivo baixado para lá. Evite deixar na pasta Downloads, que costuma ser limpa.</p>
+        </div>
+        <div>
+          <h3>Atalho na área de trabalho</h3>
+          <p>Clique com o botão direito no <code>.exe</code> › <span class="ui">Mostrar mais opções</span> › <span class="ui">Enviar para</span> › <span class="ui">Área de trabalho (criar atalho)</span>.</p>
+        </div>
+        <div>
+          <h3>Versão nova</h3>
+          <p>Os programas não se atualizam sozinhos. Feche o programa, baixe de novo nesta página e substitua o arquivo antigo na mesma pasta. O atalho continua valendo.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ============================================================ AJUDA -->
   <section class="sec" id="ajuda">
     <div class="wrap">
@@ -328,6 +387,18 @@
         <details>
           <summary>O script parou de funcionar depois de uma mudança no NoCartório</summary>
           <p>Os scripts dependem das telas do NoCartório. Quando o sistema muda, pode ser preciso uma versão nova. Avise quem mantém os scripts no cartório e, quando a correção sair, ela chega pela atualização automática.</p>
+        </details>
+        <details>
+          <summary>O Windows não deixou abrir o programa baixado</summary>
+          <ol>
+            <li>Se o <b>navegador</b> avisou que o arquivo “não é baixado com frequência”, abra a lista de downloads, clique nos três pontinhos ao lado do arquivo e escolha <span class="ui">Manter</span> (no Edge, depois <span class="ui">Mostrar mais</span> › <span class="ui">Manter assim mesmo</span>).</li>
+            <li>Se apareceu a tela azul <b>“O Windows protegeu o computador”</b>, clique em <span class="ui">Mais informações</span> e depois em <span class="ui">Executar assim mesmo</span>. Só pede uma vez por arquivo.</li>
+            <li>Se o antivírus apagou o arquivo, peça à TI para liberá-lo. Programas feitos no cartório não têm assinatura digital de fabricante, e alguns antivírus desconfiam disso.</li>
+          </ol>
+        </details>
+        <details>
+          <summary>Abri o programa e nada aconteceu</summary>
+          <p>A tela dos programas abre como uma aba do navegador padrão. Se ela não aparecer, procure a aba nova no navegador. A <b>Certidão Dominial</b> mostra o endereço na janela preta (em geral <code>http://127.0.0.1:8735</code>); copie para o navegador se a aba não abrir sozinha. No <b>Assistente CNIB</b>, clicar de novo no atalho reabre a aba.</p>
         </details>
         <details>
           <summary>O que esses scripts acessam?</summary>
@@ -904,6 +975,169 @@
       <li>Muda só as cores, e só no seu navegador. Ninguém mais vê.</li>
       <li>A escolha fica lembrada para a próxima vez.</li>
       <li>Se a <b>NoCartório Reimagined</b> estiver ligada, este tema fica desligado enquanto ela estiver ativa.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-certidao-dominial" aria-labelledby="t-dominial">
+  <header class="g-h">
+    <div><p class="g-kicker">Como instalar e usar</p><h2 id="t-dominial">Certidão Dominial</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Um programa só, sem instalador: não precisa de Python nem de nada mais. Funciona no Windows 10 e 11.</p>
+
+    <h3 class="g-part"><span>Parte A</span> Instalar</h3>
+    <ol class="steps">
+      <li>
+        <h3>Baixe o programa</h3>
+        <p><a class="btn primary" href="programas/certidao-dominial/CertidaoDominial.exe" download>Baixar CertidaoDominial.exe (34 MB)</a></p>
+        <p class="note">Se o navegador disser que o arquivo “não é baixado com frequência”, abra a lista de downloads, clique nos três pontinhos ao lado do arquivo e escolha <span class="ui">Manter</span>.</p>
+      </li>
+      <li>
+        <h3>Guarde numa pasta própria</h3>
+        <p>Crie, por exemplo, <code>Documentos\Certidão Dominial</code> e mova o <code>CertidaoDominial.exe</code> para lá. É nessa pasta que o programa grava os textos padrão quando alguém os altera.</p>
+      </li>
+      <li>
+        <h3>Abra com dois cliques</h3>
+        <p>Na primeira vez, o Windows pode mostrar a tela azul “O Windows protegeu o computador”. Clique em <span class="ui">Mais informações</span> e depois em <span class="ui">Executar assim mesmo</span>.</p>
+      </li>
+      <li>
+        <h3>Use pela aba do navegador</h3>
+        <p>Abre uma janela preta e, logo depois, a tela do programa numa aba do navegador padrão (Edge ou Chrome). <b>Deixe a janela preta aberta</b> enquanto trabalha: fechá-la encerra o programa.</p>
+      </li>
+      <li>
+        <h3>Crie um atalho <span class="opt">opcional</span></h3>
+        <p>Botão direito no <code>.exe</code> › <span class="ui">Mostrar mais opções</span> › <span class="ui">Enviar para</span> › <span class="ui">Área de trabalho (criar atalho)</span>.</p>
+      </li>
+    </ol>
+
+    <details class="acc">
+      <summary>Textos padrão do cartório (config.json)</summary>
+      <p>Os textos de abertura, encerramento, fecho e quadro do selo já vêm dentro do programa. Não é preciso baixar nada a mais.</p>
+      <p>Para mudar os textos de uma máquina, use o botão <span class="ui">Textos padrão…</span> no próprio programa: ele grava um <code>config.json</code> na pasta do <code>.exe</code>. Para levar os textos alterados a outro computador, copie esse arquivo para a mesma pasta do programa lá.</p>
+      <p><a class="btn" href="programas/certidao-dominial/config.json" download>Baixar o config.json original</a></p>
+    </details>
+
+    <h3 class="g-part"><span>Parte B</span> No dia a dia</h3>
+    <ol class="steps">
+      <li>
+        <h3>Desenhe a cadeia dominial</h3>
+        <p>Na primeira aba, monte o organograma com as matrículas, transcrições, registros de outra serventia e títulos de origem, ligados do registro anterior para o posterior. Exporte como <code>.svg</code>: abre em qualquer navegador para conferência e volta ao programa pelo botão <span class="ui">Abrir esboço</span>.</p>
+        <p>Quem revisa tem o campo <b>Correções / revisão</b> e a marcação <b>Conferido</b> em cada registro. As notas saem numeradas no rodapé do esboço.</p>
+      </li>
+      <li>
+        <h3>Escolha o tipo e anexe as certidões</h3>
+        <p>Na segunda aba, escolha Dominial, Vintenária, Trintenária, Quinzenária ou Centenária e anexe os PDFs das certidões de inteiro teor emitidas pelo sistema. Para os tipos com período, o botão <span class="ui">Marcar na cadeia os registros desse período</span> desmarca o que já estava encerrado antes.</p>
+      </li>
+      <li>
+        <h3>Confira o recorte</h3>
+        <p>Em cada certidão, <span class="ui">Conferir recorte</span> mostra o que fica de fora (sombreado). Se precisar, ajuste com <span class="ui">Marcar início</span> e <span class="ui">Marcar fim</span>. Aviso vermelho na lista quer dizer que o fim da certidão não foi encontrado: ajuste antes de gerar.</p>
+      </li>
+      <li>
+        <h3>Revise os textos e gere o PDF</h3>
+        <p>Abertura, indisponibilidades, encerramento, fecho e quadro do selo vêm preenchidos e podem ser editados (<code>**negrito**</code>, <code>*itálico*</code>, <code>__sublinhado__</code>). Quem emite e quem assina vêm sugeridos da certidão mais recente. Gere o PDF/A e assine no programa de assinatura de costume.</p>
+      </li>
+    </ol>
+
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Tudo roda só no computador. Os PDFs anexados ficam numa pasta temporária, apagada ao fechar o programa. O desenho da cadeia fica salvo no navegador como rascunho.</li>
+      <li>PDFs digitalizados (só imagem) são recusados: use as certidões geradas pelo sistema.</li>
+      <li>Registros de outra serventia aparecem só no desenho; não entram no PDF.</li>
+      <li>Para versão nova, feche a janela preta, baixe de novo e substitua o <code>.exe</code> na mesma pasta. O <code>config.json</code> ao lado dele é mantido.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-assistente-cnib" aria-labelledby="t-cnib">
+  <header class="g-h">
+    <div><p class="g-kicker">Como instalar e usar</p><h2 id="t-cnib">Assistente CNIB</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">O programa consulta a CNIB pela API da ONR com as credenciais do cartório. Elas ficam no cofre do Windows de cada conta de usuário, nunca em arquivo nem na tela. Por isso a instalação tem duas partes.</p>
+
+    <div class="g-flow" aria-label="Resumo">
+      <span>TI: credenciais da ONR</span><i>→</i><span>TI: configurar cada conta</span><i>→</i><span>Usuário: abrir e consultar</span>
+    </div>
+
+    <h3 class="g-part"><span>Parte A</span> Para a TI, uma vez em cada conta de usuário</h3>
+    <ol class="steps">
+      <li>
+        <h3>Gere as credenciais na ONR</h3>
+        <p>Em <a href="https://indisponibilidade.onr.org.br" target="_blank" rel="noopener">indisponibilidade.onr.org.br</a>, entre com o certificado ICP-Brasil A3 e abra <span class="ui">Usuários</span> › <span class="ui">Acesso API</span> › <span class="ui">Gerar chaves</span>. Guarde o <code>client_id</code> e o <code>client_secret</code> em lugar seguro.</p>
+        <p class="note">Para testes existe o ambiente STG (<code>stg-indisponibilidade.onr.org.br</code>), com credenciais diferentes das de produção.</p>
+      </li>
+      <li>
+        <h3>Baixe a versão de administração</h3>
+        <p>Ela tem janela de terminal e serve para configurar. Não é para o uso diário.</p>
+        <p><a class="btn" href="programas/assistente-cnib/AssistenteCNIB-Admin.exe" download>Baixar AssistenteCNIB-Admin.exe (13 MB)</a></p>
+      </li>
+      <li>
+        <h3>Configure, logado com a conta de quem vai usar</h3>
+        <p>O cofre é por conta de usuário do Windows: entre na conta da pessoa (não na do administrador). Na pasta do arquivo, clique com o botão direito num espaço vazio › <span class="ui">Abrir no Terminal</span> e rode:</p>
+        <p class="say">.\AssistenteCNIB-Admin.exe configurar</p>
+        <ul>
+          <li>Escolha o ambiente: <b>1</b> Produção ou <b>2</b> STG.</li>
+          <li>Cole o <code>client_id</code> e o <code>client_secret</code> com o botão direito do mouse ou <kbd>Ctrl</kbd>+<kbd>V</kbd>. <b>Nada aparece na tela</b> enquanto você cola; é de propósito. Tecle <kbd>Enter</kbd> depois de cada um.</li>
+          <li>O programa testa na ONR e mostra se deu certo.</li>
+        </ul>
+      </li>
+      <li>
+        <h3>Cadastre os operadores</h3>
+        <p>Cada consulta vai em nome de um CPF de titular ou preposto <b>cadastrado na CNIB</b>. Cadastre-os na aba <span class="ui">Configurações</span> do programa ou pelo terminal:</p>
+        <p class="say">.\AssistenteCNIB-Admin.exe operador "Nome Completo" 000.000.000-00</p>
+      </li>
+    </ol>
+
+    <details class="acc">
+      <summary>Outros comandos da versão de administração</summary>
+      <ul>
+        <li><code>.\AssistenteCNIB-Admin.exe testar</code> testa as credenciais salvas.</li>
+        <li><code>.\AssistenteCNIB-Admin.exe --simulado</code> abre para treino, sem acessar a ONR e com hashes fictícios.</li>
+        <li><code>.\AssistenteCNIB-Admin.exe remover-credenciais</code> apaga as credenciais deste computador.</li>
+      </ul>
+      <p>Se uma credencial vazar, gere chaves novas no portal da ONR e rode <code>configurar</code> de novo em cada conta.</p>
+    </details>
+
+    <h3 class="g-part"><span>Parte B</span> Para quem usa</h3>
+    <ol class="steps">
+      <li>
+        <h3>Baixe e guarde o programa</h3>
+        <p><a class="btn primary" href="programas/assistente-cnib/AssistenteCNIB.exe" download>Baixar AssistenteCNIB.exe (13 MB)</a></p>
+        <p>Mova para uma pasta própria, como <code>Documentos\Assistente CNIB</code>. Se o navegador avisar que o arquivo é pouco baixado, escolha <span class="ui">Manter</span>.</p>
+      </li>
+      <li>
+        <h3>Abra com dois cliques</h3>
+        <p>Na primeira vez, se aparecer “O Windows protegeu o computador”, clique em <span class="ui">Mais informações</span> › <span class="ui">Executar assim mesmo</span>. O programa abre direto numa aba do navegador, sem janela preta.</p>
+        <p>Crie um atalho na área de trabalho a partir deste arquivo (botão direito › <span class="ui">Mostrar mais opções</span> › <span class="ui">Enviar para</span> › <span class="ui">Área de trabalho</span>). Não use o <code>-Admin</code> no atalho.</p>
+      </li>
+      <li>
+        <h3>Escolha quem está consultando</h3>
+        <p>Em <span class="ui">Consultando como</span>, selecione o seu nome. O CPF do operador vai junto em cada consulta, como a API exige.</p>
+      </li>
+      <li>
+        <h3>Consulte e copie o texto</h3>
+        <p>Na aba <span class="ui">Consulta CNIB</span>, informe um ou mais CPF ou CNPJ. O programa confere o dígito verificador (inclusive do CNPJ alfanumérico) e avisa antes de consultar um número com provável erro. O resultado e o hash vêm da ONR, e o texto sai pronto para colar, em Arial 12 e negrito.</p>
+      </li>
+    </ol>
+
+    <h3 class="g-sub">As outras abas</h3>
+    <ul class="g-list">
+      <li><b>Validar hash:</b> separa os hashes de um texto de certidão para você conferir no portal da ONR. Nada é gravado.</li>
+      <li><b>Não emitida:</b> textos para quando a indisponibilidade não pôde ser emitida (instabilidade, falta de CPF).</li>
+      <li><b>Texto manual:</b> o gerador de texto para consultas feitas direto no site.</li>
+      <li><b>Histórico:</b> as consultas feitas neste computador, para recopiar textos.</li>
+      <li><b>Meus modelos</b> e <b>Configurações:</b> modelos, assinatura, operadores e teste de conexão.</li>
+    </ul>
+
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Clicar no atalho com o programa já aberto só reabre a aba. Fechada a aba, o programa se encerra sozinho em cerca de 5 minutos; para encerrar na hora, use <span class="ui">Configurações</span> › <span class="ui">Encerrar o programa</span>.</li>
+      <li>Os dados ficam em <code>%LOCALAPPDATA%\AssistenteCNIB</code>. O histórico guarda os CPFs e CNPJs consultados, que são dados pessoais protegidos pela LGPD.</li>
+      <li>Quem usa a mesma conta do Windows consegue usar o programa e as credenciais dela. Use uma conta por pessoa e bloqueie a tela ao sair.</li>
+      <li>Para versão nova, encerre o programa, baixe de novo e substitua o <code>.exe</code>. As credenciais e o histórico são mantidos.</li>
     </ul>
   </div>
 </dialog>

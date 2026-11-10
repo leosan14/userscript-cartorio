@@ -15,6 +15,8 @@ Endereço previsto: <https://leosan14.github.io/userscript-cartorio/>
 | `skill/ficha-cadastro-unificado/SKILL.md` | A skill que ensina a IA a gerar a ficha. |
 | `skill/ficha-cadastro-unificado.zip` | A mesma skill, empacotada para enviar ao Claude ou ao ChatGPT. |
 | `config/trello.json` | Configuração do cartório para o script do Trello (chave de API, feriados, quadros ocultos). **Sem token.** |
+| `programas/certidao-dominial/` | `CertidaoDominial.exe` e o `config.json` original (textos padrão, que também vão embutidos no `.exe`). |
+| `programas/assistente-cnib/` | `AssistenteCNIB.exe` (uso diário) e `AssistenteCNIB-Admin.exe` (TI: credenciais e comandos). |
 
 ## Colocar o site no ar (uma vez)
 
@@ -68,6 +70,19 @@ Cabeçalho esperado em cada script:
    o botão **Como usar** para ele em `data-guide`.
 
 Um endereço como `…/userscript-cartorio/#guia-trello` abre o guia direto, para mandar a um colega.
+
+## Publicar uma versão nova de um programa
+
+Os programas do Windows ficam em `programas/` e **não** se atualizam sozinhos: quem usa
+baixa de novo pela página.
+
+1. Gere o executável no projeto do programa (`gerar_executavel.bat` na Certidão Dominial,
+   `build\construir-windows.bat` no Assistente CNIB).
+2. Copie o que saiu na pasta `dist\` para a pasta correspondente em `programas/`,
+   **mantendo os nomes dos arquivos** (os links da página apontam para eles).
+3. Em `index.html`, atualize a versão e o tamanho mostrados no cartão (`<span class="ver">`)
+   e nos botões de download dos guias.
+4. Faça o commit. Os arquivos precisam ficar abaixo de 100 MB (limite do GitHub).
 
 ## Atualizar a skill da ficha
 
