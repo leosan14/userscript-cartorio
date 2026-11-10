@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NoCartório Reimagined
 // @namespace    https://app.nocartorio.com/
-// @version      0.2.1
+// @version      0.3.0
 // @description  Ribbon de navegação por atribuição cartorária (RI, TN, RCPN, TP, RTD, RCPJ) com temas Electric Blue e Hot Wheels. Desligue com ?ncr=off.
 // @author       NoCartório Reimagined
 // @match        https://app.nocartorio.com/*
@@ -1035,7 +1035,10 @@ html[data-ncr="on"] :focus-visible { outline-color: var(--ring); }
     power: '<path d="M12 3v9M6.5 6.5a8 8 0 1 0 11 0"/>',
     panel: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/>',
     more: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
-    chevronRight: '<path d="m9 6 6 6-6 6"/>'
+    chevronRight: '<path d="m9 6 6 6-6 6"/>',
+    ribbonMode: '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18"/><path d="m9 13.5 3 3 3-3"/>',
+    pinRibbon: '<path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/>',
+    check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>'
   };
   var hasIcon = (name) => Object.prototype.hasOwnProperty.call(P, name);
   function iconSvg(name, size = 18) {
@@ -1210,6 +1213,48 @@ button { cursor: pointer; background: none; border: 0; padding: 0; }
 .hint { align-self: center; padding: 0 12px; color: var(--ncr-panel-muted); font-size: 12px; white-space: nowrap; }
 kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border: 1px solid var(--ncr-group-line); border-radius: 4px; }
 
+/* ---- modos de exibição da faixa (como no Word) ---- */
+.ribbon { position: relative; }
+/* "Mostrar só as guias": o painel abre sobreposto ao conteúdo e some depois do uso */
+.ribbon[data-mode="tabs"][data-peek] .panel {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 50;
+  box-shadow: var(--ncr-shadow);
+}
+.ribbon[data-mode="tabs"]:not([data-peek]) .tab[aria-selected="true"] {
+  background: transparent; color: var(--ncr-bar-fg); border-top-color: transparent;
+  box-shadow: inset 0 -2px 0 var(--ncr-accent);
+}
+/* "Ocultar automaticamente": só uma faixa fina no topo; um clique mostra tudo por cima */
+.ribbon[data-mode="auto"] { position: absolute; top: 0; left: 0; right: 0; z-index: 55; }
+.ribbon[data-mode="auto"]:not([data-peek]) { display: none; }
+.reveal {
+  display: flex; align-items: center; justify-content: center; width: 100%; height: 12px;
+  background: var(--ncr-bar); color: var(--ncr-bar-muted); border-bottom: 2px solid var(--ncr-accent);
+}
+.reveal:hover { color: var(--ncr-bar-fg); background: var(--ncr-accent); }
+.pin {
+  flex: 0 0 auto; align-self: flex-end; margin-left: auto;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 24px; height: 24px; border-radius: 5px; color: var(--ncr-panel-muted);
+}
+.tools ~ .pin, .more ~ .pin { margin-left: 4px; }
+.pin:hover { background: var(--ncr-hover); color: var(--ncr-panel-fg); }
+.display-menu {
+  position: absolute; top: 36px; right: 8px; z-index: 70; width: 290px;
+  padding: 4px; border-radius: 8px; border: 1px solid var(--ncr-group-line);
+  background: var(--ncr-panel); color: var(--ncr-panel-fg); box-shadow: var(--ncr-shadow);
+}
+.display-menu .opt {
+  display: grid; grid-template-columns: 18px 1fr; column-gap: 8px; align-items: start;
+  width: 100%; padding: 7px 8px; border-radius: 5px; text-align: left;
+}
+.display-menu .opt:hover, .display-menu .opt:focus-visible { background: var(--ncr-hover); }
+.display-menu .opt svg { visibility: hidden; color: var(--ncr-accent); margin-top: 1px; }
+.display-menu .opt[aria-checked="true"] svg { visibility: visible; }
+.display-menu .opt b { display: block; font-weight: 600; }
+.display-menu .opt small { grid-column: 2; display: block; font-size: 11px; color: var(--ncr-panel-muted); margin-top: 1px; }
+.display-menu .foot { padding: 5px 8px 3px; font-size: 11px; color: var(--ncr-panel-muted); border-top: 1px solid var(--ncr-group-line); margin-top: 3px; }
+
 /* As abas usam sempre o rótulo curto (sigla/nome), com o nome completo em tooltip (title).
    Evita recorte da lista de abas em qualquer largura. */
 .tab .full { display: none; }
@@ -1245,9 +1290,12 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       theme: "electric-blue",
       activeTab: null,
       current: null,
-      collapsed: false,
+      mode: "always",
+      // "peek": faixa aberta temporariamente nos modos "tabs" e "auto"
+      peek: false,
       sidebarHidden: true
     };
+    const panelVisible = () => state.mode === "always" || state.peek;
     const host = doc.createElement("div");
     host.id = HOST_ID;
     host.setAttribute("data-ncr-host", "");
@@ -1288,7 +1336,17 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       "data-action": "sidebar",
       title: "Mostrar ou ocultar a sidebar original do NoCartório"
     });
-    const collapseBtn = h("button", { class: "iconbtn", type: "button", "data-action": "collapse" });
+    const displayBtn = h("button", {
+      class: "iconbtn",
+      type: "button",
+      "data-action": "display",
+      "aria-haspopup": "menu",
+      "aria-expanded": "false",
+      "aria-controls": "ncr-display-menu",
+      title: "Opções de exibição da faixa (Ctrl+F1 alterna)",
+      "aria-label": "Opções de exibição da faixa",
+      html: iconSvg("ribbonMode", 16)
+    });
     const disableBtn = h("button", {
       class: "iconbtn",
       type: "button",
@@ -1297,13 +1355,114 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       html: iconSvg("power", 16) + '<span class="txt">Original</span>'
     });
     sidebarBtn.addEventListener("click", () => handlers.onToggleSidebar());
-    collapseBtn.addEventListener("click", () => handlers.onToggleCollapsed());
+    displayBtn.addEventListener("click", () => toggleDisplay(!isDisplayOpen()));
     disableBtn.addEventListener("click", () => handlers.onDisable());
-    const actions = h("div", { class: "actions" }, themeGroup, sidebarBtn, collapseBtn, disableBtn);
+    const actions = h("div", { class: "actions" }, themeGroup, sidebarBtn, displayBtn, disableBtn);
     const titlebar = h("div", { class: "titlebar" }, brand, tablist, actions);
     const panel = h("div", { class: "panel", role: "tabpanel", id: "ncr-panel", tabindex: "-1" });
     const ribbon3 = h("div", { class: "ribbon", role: "navigation", "aria-label": "Ribbon NoCartório Reimagined" }, titlebar, panel);
-    root.append(style, ribbon3);
+    const reveal = h("button", {
+      class: "reveal",
+      type: "button",
+      "data-action": "reveal",
+      hidden: true,
+      title: "Mostrar a faixa do NoCartório Reimagined",
+      "aria-label": "Mostrar a faixa do NoCartório Reimagined",
+      html: iconSvg("more", 14)
+    });
+    reveal.addEventListener("click", () => setPeek(!state.peek));
+    const pinBtn = h("button", {
+      class: "pin",
+      type: "button",
+      "data-action": "pin",
+      title: "Fixar a faixa (sempre mostrar)",
+      "aria-label": "Fixar a faixa (sempre mostrar)",
+      html: iconSvg("pinRibbon", 15)
+    });
+    pinBtn.addEventListener("click", () => handlers.onRibbonMode("always"));
+    const DISPLAY_MODES = [
+      { id: "auto", label: "Ocultar automaticamente", hint: "Esconde a faixa inteira; clique na barrinha do topo para mostrá-la." },
+      { id: "tabs", label: "Mostrar só as guias", hint: "Os comandos aparecem ao clicar numa guia e somem depois do uso." },
+      { id: "always", label: "Sempre mostrar guias e comandos", hint: "A faixa fica fixa no topo, como sempre foi." }
+    ];
+    const displayMenu = h("div", { class: "display-menu", id: "ncr-display-menu", role: "menu", "aria-label": "Opções de exibição da faixa", hidden: true });
+    const displayOpts = /* @__PURE__ */ new Map();
+    for (const m of DISPLAY_MODES) {
+      const opt = h("button", { class: "opt", type: "button", role: "menuitemradio", "data-mode": m.id, tabindex: "-1" });
+      opt.innerHTML = iconSvg("check", 16);
+      opt.append(h("span", {}, h("b", { text: m.label })), h("small", { text: m.hint }));
+      opt.addEventListener("click", () => {
+        closeDisplay(true);
+        handlers.onRibbonMode(m.id);
+      });
+      displayOpts.set(m.id, opt);
+      displayMenu.append(opt);
+    }
+    displayMenu.append(h("div", { class: "foot", html: "Atalho: <kbd>Ctrl</kbd>+<kbd>F1</kbd> ou duplo clique numa guia" }));
+    ribbon3.append(displayMenu);
+    root.append(style, reveal, ribbon3);
+    function isDisplayOpen() {
+      return displayBtn.getAttribute("aria-expanded") === "true";
+    }
+    function closeDisplay(restoreFocus) {
+      if (!isDisplayOpen()) return;
+      displayBtn.setAttribute("aria-expanded", "false");
+      displayMenu.hidden = true;
+      if (restoreFocus) {
+        try {
+          displayBtn.focus();
+        } catch (e) {
+        }
+      }
+    }
+    function toggleDisplay(force) {
+      if (!force) {
+        closeDisplay(true);
+        return;
+      }
+      closeMore(false);
+      displayBtn.setAttribute("aria-expanded", "true");
+      displayMenu.hidden = false;
+      const opt = displayOpts.get(state.mode) || displayMenu.querySelector(".opt");
+      if (opt) opt.focus();
+    }
+    displayMenu.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopPropagation();
+        closeDisplay(true);
+      } else if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        e.preventDefault();
+        e.stopPropagation();
+        const items = [...displayOpts.values()];
+        const at = items.indexOf(root.activeElement);
+        items[(at + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length].focus();
+      } else if (e.key === "Tab") {
+        closeDisplay(false);
+      }
+    });
+    function setPeek(on) {
+      on = !!on && state.mode !== "always";
+      if (state.peek === on) return;
+      api.update({ peek: on });
+    }
+    function closePeek(restoreFocus) {
+      if (!state.peek) return;
+      const hadFocus = root.activeElement != null;
+      setPeek(false);
+      if (restoreFocus && hadFocus) {
+        const target = state.mode === "auto" ? reveal : tabButtons.get(state.activeTab);
+        try {
+          if (target) target.focus();
+        } catch (e) {
+        }
+      }
+    }
+    ribbon3.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape" || !state.peek || isMoreOpen() || isDisplayOpen()) return;
+      e.preventDefault();
+      closePeek(true);
+    });
     const moreBtn = h("button", {
       class: "more",
       type: "button",
@@ -1365,11 +1524,21 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       const path = typeof e.composedPath === "function" && e.composedPath() || [];
       return path.includes(moreBtn) || path.includes(moreMenu);
     };
+    const pathOf = (e) => typeof e.composedPath === "function" && e.composedPath() || [];
+    const withinDisplay = (e) => {
+      const path = pathOf(e);
+      return path.includes(displayBtn) || path.includes(displayMenu);
+    };
+    const outsideHost = (e) => !pathOf(e).includes(host);
     const onDocPointerDown = (e) => {
       if (isMoreOpen() && !withinMore(e)) closeMore(false);
+      if (isDisplayOpen() && !withinDisplay(e)) closeDisplay(false);
+      if (state.peek && outsideHost(e)) closePeek(false);
     };
     const onDocFocusIn = (e) => {
       if (isMoreOpen() && !withinMore(e)) closeMore(false);
+      if (isDisplayOpen() && !withinDisplay(e)) closeDisplay(false);
+      if (state.peek && outsideHost(e)) closePeek(false);
     };
     doc.addEventListener("pointerdown", onDocPointerDown);
     doc.addEventListener("focusin", onDocFocusIn);
@@ -1391,7 +1560,14 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
             "aria-controls": "ncr-panel",
             title: tab.label
           }, h("span", { class: "short", text: tab.short }), h("span", { class: "full", text: tab.label }));
-          btn.addEventListener("click", () => handlers.onSelectTab(tab.id));
+          btn.addEventListener("click", () => {
+            if (state.mode !== "always") state.peek = !(state.peek && tab.id === state.activeTab);
+            handlers.onSelectTab(tab.id);
+          });
+          btn.addEventListener("dblclick", (e) => {
+            e.preventDefault();
+            handlers.onRibbonMode(state.mode === "always" ? "tabs" : "always");
+          });
           btn.addEventListener("keydown", onTabKey);
           tabButtons.set(tab.id, btn);
           tablist.append(btn);
@@ -1413,6 +1589,7 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       else if (e.key === "Home") next = ids[0];
       else if (e.key === "End") next = ids[ids.length - 1];
       else if (e.key === "ArrowDown") {
+        if (!panelVisible()) setPeek(true);
         const first = panel.querySelector("a.cmd");
         if (first) {
           e.preventDefault();
@@ -1439,6 +1616,7 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       a.addEventListener("click", (e) => {
         if (e.defaultPrevented || e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
         e.preventDefault();
+        closePeek(false);
         handlers.onNavigate(cmd.href, cmd);
       });
       return a;
@@ -1460,8 +1638,11 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
     const renderPanel = () => {
       panel.replaceChildren();
       groupEls.clear();
-      ribbon3.toggleAttribute("data-collapsed", state.collapsed);
-      panel.hidden = state.collapsed;
+      ribbon3.setAttribute("data-mode", state.mode);
+      ribbon3.toggleAttribute("data-peek", state.peek);
+      reveal.hidden = state.mode !== "auto";
+      reveal.setAttribute("aria-expanded", state.peek ? "true" : "false");
+      panel.hidden = !panelVisible();
       const tab = state.model.tabs.find((t) => t.id === state.activeTab);
       if (!tab) {
         panel.append(h("div", { class: "empty", text: "Nenhum comando disponível nesta aba." }));
@@ -1476,6 +1657,7 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       }
       if (tab.id === "inicio") panel.append(h("div", { class: "hint", html: "Busca nativa: <kbd>Ctrl</kbd>+<kbd>K</kbd>" }));
       if (tools.childElementCount) panel.append(tools);
+      if (state.mode !== "always") panel.append(pinBtn);
     };
     const layout = () => {
       const groups = [...groupEls.values()];
@@ -1483,6 +1665,11 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
         ensureMoreHidden();
         return;
       }
+      // Mede sempre com todos os grupos visíveis: um grupo escondido mede 0px e, antes, isso
+      // fazia o layout alternar sem parar entre "mostrar tudo" e "recolher no Mais" (a faixa piscava).
+      // Tudo acontece no mesmo tick, então o navegador não chega a pintar o estado intermediário.
+      for (const { el } of groupEls.values()) el.hidden = false;
+      if (moreBtn.parentNode === panel) moreBtn.remove();
       const availableWidth = panel.getBoundingClientRect().width;
       const widths = {};
       let measurable = availableWidth > 0;
@@ -1497,7 +1684,7 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
         return;
       }
       const desc = groups.map(({ group }) => ({ id: group.id, region: group.region, rank: group.rank }));
-      const { hidden } = computeVisibleGroups(desc, widths, availableWidth, { moreWidth: 52 });
+      const { hidden } = computeVisibleGroups(desc, widths, availableWidth, { moreWidth: state.mode !== "always" ? 80 : 52 });
       applyLayout(new Set(hidden));
     };
     function ensureMoreHidden() {
@@ -1526,6 +1713,7 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       moreBtn.classList.toggle("off", !needsMore);
       if (needsMore) {
         if (moreBtn.parentNode !== panel) panel.append(moreBtn, moreMenu);
+        if (pinBtn.parentNode === panel) panel.append(pinBtn);
         moreBtn.hidden = false;
       } else {
         if (moreBtn.parentNode === panel) moreBtn.remove();
@@ -1555,15 +1743,19 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       for (const [id3, btn] of themeButtons) btn.setAttribute("aria-checked", id3 === state.theme ? "true" : "false");
       sidebarBtn.setAttribute("aria-pressed", state.sidebarHidden ? "false" : "true");
       sidebarBtn.innerHTML = iconSvg("panel", 16) + '<span class="txt">Sidebar original</span>';
-      collapseBtn.setAttribute("aria-expanded", state.collapsed ? "false" : "true");
-      collapseBtn.setAttribute("aria-label", state.collapsed ? "Expandir a Ribbon" : "Recolher a Ribbon");
-      collapseBtn.title = state.collapsed ? "Expandir a Ribbon" : "Recolher a Ribbon";
-      collapseBtn.innerHTML = iconSvg(state.collapsed ? "chevronDown" : "chevronUp", 16);
+      for (const [id3, opt] of displayOpts) opt.setAttribute("aria-checked", id3 === state.mode ? "true" : "false");
     };
     let resizeObserver = null;
+    let lastLayoutWidth = -1;
     const onHostResize = () => {
-      if (handlers.onResize) handlers.onResize(host.getBoundingClientRect().height);
-      if (!state.collapsed) layout();
+      const rect = host.getBoundingClientRect();
+      if (handlers.onResize) handlers.onResize(rect.height);
+      // Só a largura muda o que cabe na faixa; mudanças de altura não refazem o layout
+      // (evita um ciclo layout → nova altura → layout).
+      if (panelVisible() && Math.round(rect.width) !== lastLayoutWidth) {
+        lastLayoutWidth = Math.round(rect.width);
+        layout();
+      }
     };
     const api = {
       host,
@@ -1584,12 +1776,14 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       },
       update(patch = {}) {
         const modelChanged = patch.model && patch.model !== state.model;
+        const modeChanged = patch.mode !== void 0 && patch.mode !== state.mode;
         Object.assign(state, patch);
+        if (modeChanged || state.mode === "always") state.peek = false;
         renderActions();
         renderTabs();
         renderPanel();
         layout();
-        if (modelChanged || patch.collapsed !== void 0) onHostResize();
+        if (modelChanged || patch.mode !== void 0 || patch.peek !== void 0) onHostResize();
       },
       focusTab() {
         const btn = tabButtons.get(state.activeTab);
@@ -1684,7 +1878,7 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
   }
 
   // src/core/app.js
-  var VERSION = true ? "0.2.1" : "dev";
+  var VERSION = true ? "0.3.0" : "dev";
   var MIN_DESKTOP_WIDTH = 1024;
   var RETRY_DELAYS_MS = Object.freeze([60, 150, 350, 800, 1800, 4e3]);
   var MAX_ATTEMPTS = RETRY_DELAYS_MS.length + 1;
@@ -1821,20 +2015,16 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
     };
     const render = (patch = {}) => {
       const p = prefs.get();
-      ribbon3.update({ model, theme: p.theme, collapsed: p.collapsed, sidebarHidden: p.sidebarHidden, ...patch });
+      ribbon3.update({ model, theme: p.theme, mode: p.ribbonMode, sidebarHidden: p.sidebarHidden, ...patch });
     };
     const handlers = {
       onNavigate: (href) => nav.go(href),
       onSelectTab(id3) {
-        prefs.set({ lastTab: id3, collapsed: false });
+        prefs.set({ lastTab: id3 });
         render({ activeTab: id3 });
       },
       onTheme: (id3) => api.setTheme(id3),
-      onToggleCollapsed() {
-        const collapsed = !prefs.get().collapsed;
-        prefs.set({ collapsed });
-        render({ collapsed });
-      },
+      onRibbonMode: (mode) => api.setRibbonMode(mode),
       onToggleSidebar() {
         const sidebarHidden = !prefs.get().sidebarHidden;
         prefs.set({ sidebarHidden });
@@ -2114,6 +2304,16 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
         }
         return true;
       },
+      // "always" (sempre mostrar), "tabs" (só as guias) ou "auto" (ocultar automaticamente)
+      get ribbonMode() {
+        return prefs.get().ribbonMode;
+      },
+      setRibbonMode(mode) {
+        if (!isRibbonMode(mode)) return false;
+        prefs.set({ ribbonMode: mode });
+        if (active && ribbon3) render({ mode, peek: false });
+        return true;
+      },
       cycleTheme() {
         const at = THEME_IDS.indexOf(prefs.get().theme);
         return api.setTheme(THEME_IDS[(at + 1) % THEME_IDS.length]);
@@ -2183,6 +2383,11 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
       }
     };
     const onKey = (e) => {
+      if (e.key === "F1" && e.ctrlKey && !e.altKey && !e.shiftKey && !e.metaKey && active) {
+        e.preventDefault();
+        api.setRibbonMode(prefs.get().ribbonMode === "always" ? "tabs" : "always");
+        return;
+      }
       if (!e.altKey || !e.shiftKey || e.ctrlKey || e.metaKey) return;
       const t = e.target;
       if (t && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName))) return;
@@ -2221,16 +2426,19 @@ kbd { font: 600 11px ui-monospace, Consolas, monospace; padding: 1px 5px; border
     enabled: true,
     theme: DEFAULT_THEME,
     sidebarHidden: true,
-    collapsed: false,
+    ribbonMode: "always",
     lastTab: null
   });
+  var RIBBON_MODES = Object.freeze(["always", "tabs", "auto"]);
+  var isRibbonMode = (v) => RIBBON_MODES.includes(v);
   function sanitize(raw) {
     const out = { ...DEFAULTS };
     if (!raw || typeof raw !== "object") return out;
     if (typeof raw.enabled === "boolean") out.enabled = raw.enabled;
     if (isThemeId(raw.theme)) out.theme = raw.theme;
     if (typeof raw.sidebarHidden === "boolean") out.sidebarHidden = raw.sidebarHidden;
-    if (typeof raw.collapsed === "boolean") out.collapsed = raw.collapsed;
+    if (isRibbonMode(raw.ribbonMode)) out.ribbonMode = raw.ribbonMode;
+    else if (raw.collapsed === true) out.ribbonMode = "tabs";
     if (typeof raw.lastTab === "string" && /^[a-z]{2,16}$/.test(raw.lastTab)) out.lastTab = raw.lastTab;
     return out;
   }
