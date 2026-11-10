@@ -10,6 +10,9 @@
 // @sandbox      raw
 // @inject-into  page
 // @noframes
+// @homepageURL  https://leosan14.github.io/userscript-cartorio/
+// @updateURL    https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-cadastro-unificado.user.js
+// @downloadURL  https://leosan14.github.io/userscript-cartorio/scripts/nocartorio-cadastro-unificado.user.js
 // ==/UserScript==
 
 /*
