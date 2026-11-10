@@ -215,6 +215,17 @@
           </div>
         </article>
 
+        <article class="card" id="livro3">
+          <div class="card-top"><span class="tag">Registro de Imóveis</span><span class="ver" data-version="nocartorio-livro3-busca-avancada.user.js"></span></div>
+          <h3>Busca avançada no Livro 3</h3>
+          <p>Busca no Registro Auxiliar por nome, CPF ou CNPJ, produto, safra, número do registro e título, e já mostra em cada resultado as partes, a garantia, o valor e o vencimento.</p>
+          <p class="where"><b>Onde aparece</b> No Livro 3 (Registro Auxiliar), botão <span class="ui">Busca avançada</span> ou <kbd>Alt</kbd>+<kbd>B</kbd>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-livro3-busca-avancada.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-livro3">Como usar</button>
+          </div>
+        </article>
+
         <article class="card" id="protesto">
           <div class="card-top"><span class="tag">Protesto</span><span class="ver" data-version="busca-protesto.user.js"></span></div>
           <h3>Busca Protesto</h3>
@@ -223,6 +234,17 @@
           <div class="actions">
             <a class="btn primary" href="scripts/busca-protesto.user.js">Instalar</a>
             <button type="button" class="btn" data-guide="guia-protesto">Como usar</button>
+          </div>
+        </article>
+
+        <article class="card" id="reimagined">
+          <div class="card-top"><span class="tag">Aparência</span><span class="ver" data-version="nocartorio-reimagined.user.js"></span></div>
+          <h3>NoCartório Reimagined</h3>
+          <p>Troca o menu lateral por uma faixa no topo com os comandos organizados por atribuição (RI, TN, RCPN, TP, RTD e RCPJ), em dois temas de cores.</p>
+          <p class="where"><b>Onde aparece</b> Em todas as telas, no topo. Liga e desliga com <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-reimagined.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-reimagined">Como usar</button>
           </div>
         </article>
 
@@ -713,6 +735,103 @@
   </div>
 </dialog>
 
+<dialog class="guide" id="guia-livro3" aria-labelledby="t-livro3">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-livro3">Busca avançada no Livro 3</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Para achar cédulas, CPRs e outros registros do Livro 3 combinando vários critérios, sem abrir registro por registro para ver do que se trata.</p>
+    <ol class="steps">
+      <li>
+        <h3>Abra o Livro 3 (Registro Auxiliar)</h3>
+        <p>O botão <span class="ui">Busca avançada</span> aparece junto dos filtros da tela, ao lado do botão Buscar do sistema. O atalho é <kbd>Alt</kbd>+<kbd>B</kbd>.</p>
+      </li>
+      <li>
+        <h3>Preencha um ou mais campos</h3>
+        <ul>
+          <li><b>Nome / razão social</b> e <b>CPF / CNPJ</b> de qualquer das partes.</li>
+          <li><b>Nº do registro.</b></li>
+          <li><b>Produto</b> (soja, milho, bovinos, trator…) e <b>Safra</b> (por exemplo 2026/2027). Os dois campos sugerem valores enquanto você digita.</li>
+          <li><b>Título / tipo de ato</b>, como “Cédula de Produto Rural”.</li>
+        </ul>
+        <p>Os campos se somam: o registro precisa conter todos. Com tudo em branco, vêm os registros mais recentes.</p>
+      </li>
+      <li>
+        <h3>Busque e leia os resultados</h3>
+        <p>Clique em <span class="ui">Buscar</span> ou tecle <kbd>Enter</kbd>. Cada resultado traz o número (R-…), a data, o tipo de ato e, tirados do texto do registro, emitentes ou devedores, credores, avalistas, produto, safra, garantia, valores, vencimento e imóvel. Registros cancelados e averbações vêm marcados.</p>
+        <p><span class="ui">Ver registro ↗</span> e <span class="ui">Documento ↗</span> abrem o original em outra aba.</p>
+      </li>
+      <li>
+        <h3>Confira onde o termo foi encontrado</h3>
+        <p>Embaixo de cada resultado há uma marca para cada campo que você preencheu:</p>
+        <ul>
+          <li><b>✓</b> o termo está no campo certo (por exemplo, o nome está mesmo entre as partes);</li>
+          <li><b>~</b> o termo aparece no texto do registro, mas não naquele campo;</li>
+          <li><b>?</b> o script não conseguiu localizar.</li>
+        </ul>
+        <p>Para ver só os que têm ✓, marque <span class="ui">Só correspondências nos campos (nesta página)</span>.</p>
+      </li>
+      <li>
+        <h3>Leve para a planilha ou para a lista do sistema</h3>
+        <p><span class="ui">Exportar CSV desta página</span> baixa os resultados que estão na tela num arquivo que abre no Excel. <span class="ui">Abrir na lista do sistema</span> repete a mesma busca na tela normal do NoCartório.</p>
+      </li>
+    </ol>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>O sistema procura no texto inteiro do registro, então “milho” também pode trazer “milhões”. As marcas ✓ e ~ servem para separar uma coisa da outra.</li>
+      <li>Os dados de cada resultado são extraídos automaticamente do texto. Antes de usar num ato ou numa certidão, confira no registro.</li>
+      <li>A exportação e o filtro de correspondência valem para a página de resultados que está na tela; use os botões de página para ver as demais.</li>
+      <li>O script só consulta. Nada é alterado nos registros.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-reimagined" aria-labelledby="t-reimagined">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar</p><h2 id="t-reimagined">NoCartório Reimagined</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">Depois de instalado, o menu lateral do NoCartório dá lugar a uma faixa no topo da tela. Se estranhar, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> volta ao normal na hora.</p>
+    <ol class="steps">
+      <li>
+        <h3>Navegue pelas abas</h3>
+        <p>A faixa tem as abas <b>Início</b>, <b>Serviços</b>, uma para cada atribuição (RI, TN, RCPN, TP, RTD e RCPJ), <b>Financeiro</b> e <b>Administração</b>. Clique numa aba para ver os comandos dela, reunidos em grupos. O que não couber na largura da tela fica guardado no botão <span class="ui">Mais comandos</span> (os três pontinhos).</p>
+      </li>
+      <li>
+        <h3>Escolha o tema</h3>
+        <p>À direita da faixa, clique em <span class="ui">Electric Blue</span> ou <span class="ui">Hot Wheels</span>. Pelo teclado, <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd> alterna entre os dois.</p>
+      </li>
+      <li>
+        <h3>Ajuste a faixa</h3>
+        <p>Ainda à direita, três botões:</p>
+        <ul>
+          <li>um mostra ou esconde o menu lateral original, para quando você precisar dele;</li>
+          <li>outro recolhe a faixa, deixando só as abas, e expande de novo;</li>
+          <li><span class="ui">Original</span> desliga a Reimagined e devolve a interface normal.</li>
+        </ul>
+      </li>
+      <li>
+        <h3>Ligue e desligue quando quiser</h3>
+        <table class="keys">
+          <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd></td><td>Liga ou desliga a Reimagined</td></tr>
+          <tr><td><kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>T</kbd></td><td>Troca o tema</td></tr>
+        </table>
+        <p>Os atalhos não funcionam enquanto você digita num campo.</p>
+      </li>
+    </ol>
+    <h3 class="g-sub">Se a tela ficar estranha</h3>
+    <p>Acrescente <code>?ncr=off</code> ao fim do endereço do NoCartório e tecle <kbd>Enter</kbd>. A Reimagined fica desligada até você religar com <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> ou com <code>?ncr=on</code> no endereço.</p>
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Funciona em janelas com pelo menos 1024 pixels de largura. Em janela estreita, a interface original volta sozinha.</li>
+      <li>Enquanto a Reimagined está ligada, o <b>Tema Barbie / Hot Wheels</b> fica desligado e o seletor dele some. Ao desligar a Reimagined, ele volta como estava.</li>
+      <li>Muda só a navegação e as cores, e só no seu navegador. Suas escolhas ficam lembradas.</li>
+    </ul>
+  </div>
+</dialog>
+
 <dialog class="guide" id="guia-protesto" aria-labelledby="t-protesto">
   <header class="g-h">
     <div><p class="g-kicker">Como usar</p><h2 id="t-protesto">Busca Protesto</h2></div>
@@ -784,6 +903,7 @@
     <ul class="g-list">
       <li>Muda só as cores, e só no seu navegador. Ninguém mais vê.</li>
       <li>A escolha fica lembrada para a próxima vez.</li>
+      <li>Se a <b>NoCartório Reimagined</b> estiver ligada, este tema fica desligado enquanto ela estiver ativa.</li>
     </ul>
   </div>
 </dialog>
