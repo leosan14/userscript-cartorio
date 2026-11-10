@@ -1,0 +1,19 @@
+{
+  "porta": 8735,
+  "abrir_navegador": true,
+  "oficial_md": "***Agda Ferreira Rodrigues da Cunha Reis,*** Oficial Registrador do Registro de Imóveis de São João d'Aliança, Estado de Goiás, na Forma da Lei, e etc..",
+  "localizacao_padrao": "zona rural do município de São João d'Aliança, Estado de Goiás",
+  "local_data": "Comarca de Alto Paraíso de Goiás, Distrito Judiciário de São João d'Aliança - GO, {data_extenso}.",
+  "cargo_assinante": "Escrevente Autorizado(a)",
+  "selo_cabecalho_md": "PODER JUDICIÁRIO - ESTADO DO GOIÁS\nServiço de Registros Públicos e Tabelionatos - **Comarca de Alto Paraíso de Goiás, Distrito Judiciário de São João d'Aliança - GO**",
+  "selo_consulta": "https://see.tjgo.jus.br",
+  "modelo_abertura": "**CERTIFICA**, a requerimento verbal da parte interessada, que revendo em cartório {fontes}, das quais extraí a presente certidão que se refere às inscrições (transcrições, registros e averbações) relativas ao imóvel denominado **\"{denominacao}\"**, localizado na {localizacao}, nas quais se encontra o descrito:",
+  "modelo_encerramento": "Nada mais consta até a presente data. É o que contém em {inscricoes} e seus registros e dos quais extraí a presente Certidão de Inteiro Teor.///\n\nEsta certidão é {Tipo}, não constando nela as certificações de ações reais e pessoais reipersecutórias, relativas ao imóvel bem como de ônus reais. A certidão tem prazo de validade de 30 (trinta) dias corridos, para fundamentar a realização de negócios jurídicos, contados da data da emissão que constar no corpo da certidão. Este prazo está previsto no decreto 93.240/86, que regulamenta a lei federal 7.433/85. **As partes declaram ainda que concordam com o tratamento de seus dados pessoais para finalidade específica deste ato, em conformidade com a Lei nº 13.709/2018 (Lei Geral de Proteção de Dados), cientes de que o presente instrumento poderá ser reproduzido por meio de certidão, a pedido de qualquer interessado independente de autorização expressa das partes, por se tratar de instrumento público nos termos do artigo 16, da Lei 6.015/73.**{protocolos}\n\n**OBSERVAÇÃO: Nos termos do §4º do art. 15 da Lei nº 19.191/2015, do Estado de Goiás, a partir do dia 31/03/2021 constitui condição necessária para os atos do registro de imóveis a demonstração ou declaração no instrumento público a ser registrado do recolhimento integral das parcelas previstas no §1º daquele artigo, com base de cálculo na Tabela XIII da Lei nº 14.376/2002, do Estado de Goiás, Inclusive na hipótese de documento lavrado em outra unidade da Federação.**\n\nEmitido por **{emissor} - {cargo_emissor}.**",
+  "tipos": {
+    "Dominial": { "titulo": "Certidão Dominial", "anos": 0 },
+    "Vintenária": { "titulo": "Certidão Vintenária", "anos": 20 },
+    "Trintenária": { "titulo": "Certidão Trintenária", "anos": 30 },
+    "Quinzenária": { "titulo": "Certidão Quinzenária", "anos": 15 },
+    "Centenária": { "titulo": "Certidão Centenária", "anos": 100 }
+  }
+}
