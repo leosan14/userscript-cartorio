@@ -1038,7 +1038,7 @@
       </li>
       <li>
         <h3>Cole a ficha e, se quiser, o PDF</h3>
-        <p>Cole o JSON (ou abra o arquivo <code>.json</code>). O PDF original é opcional: se escolhido, cada serviço recebe como Requerimento só as páginas do seu título. Escolha também o que fazer com o endereço do devedor.</p>
+        <p>Cole o JSON (ou abra o arquivo <code>.json</code>). O PDF original é opcional: se escolhido, cada serviço recebe como Requerimento só as páginas do seu título. Escolha também o que fazer com o endereço das partes: cadastrar o do título quando não houver um igual, só avisar, ou não cadastrar.</p>
       </li>
       <li>
         <h3>Confira</h3>
@@ -1046,7 +1046,7 @@
       </li>
       <li>
         <h3>Abra os serviços</h3>
-        <p>Clique em <span class="ui">Abrir serviços marcados</span> e confirme. Para cada título o script cadastra as pessoas que faltam, cria o serviço Protesto, inclui Apresentante, Cedente, Sacador e Devedor(es) e cadastra o Título Apresentado para Protesto no apontamento.</p>
+        <p>Clique em <span class="ui">Abrir serviços marcados</span> e confirme. Para cada título o script cadastra as pessoas que faltam, cria o serviço Protesto, inclui Apresentante, Cedente, Sacador e Devedor(es) e cadastra o Título Apresentado para Protesto no apontamento. Também vincula nos atos os documentos obrigatórios de cada parte (endereço, título). Vencimento “à vista” é lançado com a data de emissão, com aviso.</p>
       </li>
       <li>
         <h3>Use a relação título × serviço</h3>
@@ -1057,9 +1057,10 @@
     <h3 class="g-sub">Bom saber</h3>
     <ul class="g-list">
       <li>Nada é selado nem pago pelo script.</li>
-      <li>Título já aberto antes neste navegador aparece com o aviso “Já aberto antes” e vem desmarcado, para não duplicar.</li>
+      <li>Título já aberto antes neste navegador aparece com o aviso “Já aberto” e vem desmarcado, para não duplicar. Se marcar, o script completa o serviço que já existe em vez de criar outro.</li>
+      <li>Serviços abertos que ficaram sem apresentante: o botão <span class="ui">Corrigir apresentante dos serviços abertos</span> inclui o apresentante do ato (ou, sem ele, o sacador). Dá para colar links de outros serviços.</li>
       <li>A última relação fica guardada neste navegador: o botão <span class="ui">Última relação</span> a mostra de novo.</li>
-      <li>Se o NoCartório for atualizado no meio do uso, o script pede para recarregar a página (<kbd>F5</kbd>).</li>
+      <li>Se o NoCartório for atualizado no meio do uso, o script tenta de novo sozinho; se não der, pede para recarregar a página (<kbd>F5</kbd>).</li>
     </ul>
   </div>
 </dialog>
