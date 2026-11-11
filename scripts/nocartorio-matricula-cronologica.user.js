@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         NoCartório – Matrícula em ordem cronológica
 // @namespace    cartorio-sja
-// @version      1.2.0
-// @description  Mostra todos os atos de uma matrícula (Registro Geral) em ordem cronológica, num texto corrido, com opção de imprimir e copiar.
+// @version      1.3.0
+// @description  Mostra todos os atos de uma matrícula (Registro Geral) em ordem cronológica, num texto corrido, com opção de imprimir e copiar, zoom do texto e ajuste de largura.
 // @author       Leonardo Santos Oliveira
 // @match        https://app.nocartorio.com/*
 // @grant        none
@@ -30,10 +30,14 @@
   #${ID}-bar button,#${ID}-bar label{background:#333;color:#eee;border:1px solid #555;border-radius:6px;padding:6px 10px;
     font:inherit;cursor:pointer}
   #${ID}-bar button:hover{background:#444}
+  #${ID}-bar .${ID}-grp{display:inline-flex;align-items:center;gap:0;border:1px solid #555;border-radius:6px;overflow:hidden}
+  #${ID}-bar .${ID}-grp button{border:0;border-radius:0;padding:6px 9px;min-width:30px}
+  #${ID}-bar .${ID}-grp span{padding:0 8px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums;color:#ccc}
   #${ID}-scroll{flex:1;overflow:auto;padding:24px 12px}
-  .${ID}-page{background:#fff;color:#000;max-width:800px;margin:0 auto;padding:48px 56px;box-shadow:0 2px 12px rgba(0,0,0,.4);
+  .${ID}-page{background:#fff;color:#000;max-width:var(--${ID}-w,800px);margin:0 auto;padding:48px 56px;box-shadow:0 2px 12px rgba(0,0,0,.4);
     font:14px/1.5 Arial,Helvetica,sans-serif;text-align:justify}
   .${ID}-page p{margin:0}
+  .${ID}-txt,.${ID}-mat{zoom:var(--${ID}-z,1)}
   .${ID}-ato{padding:6px 0 10px;border-bottom:1px dashed #bbb;margin-bottom:10px}
   .${ID}-ato:last-child{border-bottom:0}
   .${ID}-meta{font:11px system-ui,sans-serif;color:#888;margin-bottom:4px;text-align:left;user-select:none}
@@ -153,6 +157,18 @@
     }).join(`<div class="${ID}-sep"></div>`);
   }
 
+  // ---------- zoom e largura (lembrados neste navegador) ----------
+  const PREF_KEY = ID + '-prefs';
+  const ZOOM = { min: 0.6, max: 2.5, step: 0.1, def: 1 };
+  const LARG = { min: 500, max: 2000, step: 100, def: 800 };
+  const clamp = (v, r) => Math.min(r.max, Math.max(r.min, Math.round(Math.round(v / r.step) * r.step * 1000) / 1000));
+  function loadPrefs() {
+    let p = {};
+    try { p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; } catch (e) {}
+    return { z: clamp(Number(p.z) || ZOOM.def, ZOOM), w: clamp(Number(p.w) || LARG.def, LARG) };
+  }
+  function savePrefs(p) { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {} }
+
   // ---------- overlay ----------
   async function open() {
     close();
@@ -163,6 +179,13 @@
       <div id="${ID}-bar">
         <b>Matrícula em ordem cronológica</b>
         <span id="${ID}-info">Carregando…</span>
+        <span class="${ID}-grp" title="Tamanho do texto">
+          <button data-a="z-" title="Diminuir texto">A−</button><span data-v="z"></span><button data-a="z+" title="Aumentar texto">A+</button>
+        </span>
+        <span class="${ID}-grp" title="Largura da folha">
+          <button data-a="w-" title="Estreitar">⇥⇤</button><span data-v="w"></span><button data-a="w+" title="Alargar">⇤⇥</button>
+        </span>
+        <button data-a="zw0" title="Voltar texto e largura ao padrão">Padrão</button>
         <button data-a="ord">Inverter ordem</button>
         <button data-a="meta">Ocultar índices</button>
         <button data-a="copy">Copiar texto</button>
@@ -176,6 +199,19 @@
     const info = ov.querySelector('#' + ID + '-info');
     const scroll = ov.querySelector('#' + ID + '-scroll');
     let asc = true, entries = [];
+    const prefs = loadPrefs();
+    const applyPrefs = () => {
+      scroll.style.setProperty('--' + ID + '-z', String(prefs.z));
+      scroll.style.setProperty('--' + ID + '-w', prefs.w + 'px');
+      ov.querySelector('[data-v="z"]').textContent = Math.round(prefs.z * 100) + '%';
+      ov.querySelector('[data-v="w"]').textContent = prefs.w + ' px';
+      ov.querySelector('[data-a="z-"]').disabled = prefs.z <= ZOOM.min;
+      ov.querySelector('[data-a="z+"]').disabled = prefs.z >= ZOOM.max;
+      ov.querySelector('[data-a="w-"]').disabled = prefs.w <= LARG.min;
+      ov.querySelector('[data-a="w+"]').disabled = prefs.w >= LARG.max;
+      savePrefs(prefs);
+    };
+    applyPrefs();
 
     const render = () => {
       scroll.innerHTML = build(entries, asc);
@@ -187,6 +223,9 @@
       if (!a) return;
       if (a === 'close') close();
       if (a === 'ord') { asc = !asc; render(); }
+      if (a === 'z-' || a === 'z+') { prefs.z = clamp(prefs.z + (a === 'z+' ? 1 : -1) * ZOOM.step, ZOOM); applyPrefs(); }
+      if (a === 'w-' || a === 'w+') { prefs.w = clamp(prefs.w + (a === 'w+' ? 1 : -1) * LARG.step, LARG); applyPrefs(); }
+      if (a === 'zw0') { prefs.z = ZOOM.def; prefs.w = LARG.def; applyPrefs(); }
       if (a === 'meta') {
         const on = scroll.classList.toggle(ID + '-hidemeta');
         ev.target.textContent = on ? 'Mostrar índices' : 'Ocultar índices';
