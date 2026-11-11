@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         NoCartório – Apontamento assistido (Protesto)
 // @namespace    leosan14/nocartorio
-// @version      0.1.0
+// @version      0.2.1
 // @description  Abre serviços "Protesto" a partir da ficha JSON (CENPROT/CRA): apresentante, cedente, sacador, devedores e Título Apresentado para Protesto. Gera a relação título × serviço para conferência e selagem manual.
 // @author       Leonardo Santos Oliveira
 // @match        https://app.nocartorio.com/admin/manager/*
@@ -50,6 +50,15 @@
     return m ? decodeURIComponent(m[1]) : '';
   }
 
+  // Lê a versão Inertia do HTML: <script data-page="app" type="application/json">{…}</script> (v2) ou <div data-page="{…}"> (v1).
+  function versionFromHtml(html) {
+    const m2 = html.match(/<script[^>]*data-page="app"[^>]*>([\s\S]*?)<\/script>/);
+    if (m2) { try { return JSON.parse(m2[1]).version; } catch (e) { /* */ } }
+    const m1 = html.match(/data-page="(\{[^"]+)"/);
+    if (m1) { const t = document.createElement('textarea'); t.innerHTML = m1[1]; try { return JSON.parse(t.value).version; } catch (e) { /* */ } }
+    return null;
+  }
+
   let _version = null;
   async function inertiaVersion() {
     if (_version) return _version;
@@ -58,15 +67,11 @@
     } catch (e) { /* fallback abaixo */ }
     if (!_version) {
       const el = document.querySelector('[data-page]');
-      if (el && el.dataset.page) { try { _version = JSON.parse(el.dataset.page).version; } catch (e) { /* */ } }
+      if (el && el.dataset.page) { try { _version = JSON.parse(el.dataset.page).version; } catch (e) { try { _version = JSON.parse(el.textContent).version; } catch (e2) { /* */ } } }
     }
     if (!_version) {
       const html = await (await fetch(location.href, { credentials: 'same-origin' })).text();
-      const m = html.match(/data-page="([^"]+)"/);
-      if (m) {
-        const t = document.createElement('textarea'); t.innerHTML = m[1];
-        _version = JSON.parse(t.value).version;
-      }
+      _version = versionFromHtml(html);
     }
     return _version;
   }
@@ -81,8 +86,17 @@
     }, extra || {});
   }
 
-  async function inertiaGet(url) {
+  // Versão nova publicada no meio do uso: lê a versão atual no HTML da página e repete.
+  async function refreshVersion(url) {
+    const html = await (await fetch(url || location.href, { credentials: 'same-origin' })).text();
+    const v = versionFromHtml(html);
+    if (v) _version = v;
+    return !!v;
+  }
+
+  async function inertiaGet(url, retried) {
     const r = await fetch(url, { credentials: 'same-origin', headers: await inertiaHeaders() });
+    if (r.status === 409 && !retried && await refreshVersion(url)) return inertiaGet(url, true);
     if (r.status === 409) throw new Error('O NoCartório foi atualizado. Recarregue a página (F5) e rode de novo.');
     if (!r.ok) throw new Error(`GET ${rel(url)} → HTTP ${r.status}`);
     return r.json();
@@ -302,20 +316,21 @@
     if (!e || !e.rua) return;
     const doc = docOf(p);
     const dt = doc.tipo === 'PF' ? CFG.docEnderecoPF : CFG.docEnderecoPJ;
+    if (modo === 'nunca') return;
     if (!novo) {
-      if (modo === 'novos') {
-        const docs = (await profileDocs(profileId)).filter((d) => [32, 33, 34].includes(d.document_type.id));
-        let igual = false;
-        for (const d of docs.slice(0, 8)) {
-          const v = await docValues(profileId, d.id);
-          if (norm(v.endereco_rua).includes(norm(e.rua).slice(0, 12)) && (!e.cep || digits(v.endereco_cep) === digits(e.cep))) { igual = true; break; }
-        }
-        if (!igual) warn(`${p.nome}: endereço do título não confere com os cadastrados — conferir/atualizar (${e.rua}${e.cep ? ', CEP ' + e.cep : ''})`);
+      const docs = (await profileDocs(profileId)).filter((d) => d.document_type.id === dt);
+      let igual = false;
+      for (const d of docs.slice(0, 10)) {
+        const v = await docValues(profileId, d.id);
+        if (norm(v.endereco_rua).includes(norm(e.rua).slice(0, 12)) && (!e.cep || !v.endereco_cep || digits(v.endereco_cep) === digits(e.cep))) { igual = true; break; }
+      }
+      if (igual) return;
+      if (modo === 'avisar') {
+        warn(`${p.nome}: endereço do título não confere com os cadastrados — conferir/atualizar (${e.rua}${e.cep ? ', CEP ' + e.cep : ''})`);
         return;
       }
-      if (modo === 'nunca') return;
+      warn(`${p.nome}: cadastrado o endereço do título (${e.rua}), diferente dos que já existiam`);
     }
-    if (modo === 'nunca') return;
     await createDocument(profileId, dt, {
       identificador_registro: `ENDEREÇO - ${e.rua}`.toUpperCase().slice(0, 190),
       endereco_cep: e.cep,
@@ -375,10 +390,59 @@
     }
   }
 
+  // Apresentante do SERVIÇO (não do ato): o serviço é um processo próprio com o papel Apresentante.
+  async function serviceIdOf(protocolId) {
+    const j = await inertiaGet(`${BASE}/admin/manager/v2/protocol/${protocolId}`);
+    const d = j.props && j.props.protocol && j.props.protocol.data;
+    return { sid: d && d.service && d.service.id, code: d && d.protocolInformation && d.protocolInformation.code };
+  }
+
+  async function ensureApresentanteServico(protocolId, apId, warn) {
+    const { sid } = await serviceIdOf(protocolId);
+    if (!sid) { warn('Não achei o processo do serviço para conferir o apresentante.'); return false; }
+    const ed = await inertiaGet(`${BASE}/admin/manager/v2/process/${sid}/edit`);
+    const inputs = Object.values((ed.props.content && ed.props.content.inputs) || {});
+    const inp = inputs.find((i) => /^Apresentante/i.test(i.label || ''));
+    if (!inp) { warn('Serviço sem papel Apresentante editável.'); return false; }
+    const cur = (inp.initialSelection || []).map((x) => x.value);
+    if (cur.includes(apId)) return false;
+    if (cur.length) { warn('O serviço já tinha outro apresentante: mantido. Conferir.'); return false; }
+    await apiPost(`${BASE}/api/process/${sid}/process-type-role/${inp.meta.processTypeRoleId}/attach-profile`, { profile_id: apId });
+    return true;
+  }
+
+  // Corrige serviços já abertos que ficaram sem apresentante do serviço.
+  // Usa o Apresentante do ato de apontamento; sem ele, o Sacador (com aviso).
+  async function corrigirApresentantes(lista, log) {
+    const out = [];
+    for (const prot of lista) {
+      const linha = { code: prot.code || prot.id, link: `${BASE}/admin/manager/v2/protocol/${prot.id}`, msg: '' };
+      try {
+        const procs = await getProcesses(prot.id);
+        const apont = procs.find((p) => inputByLabel(p, /Apontamento do Tabelionato/i));
+        if (!apont) throw new Error('sem ato de apontamento');
+        const apIn = inputByLabel(apont, /^Apresentante$/i);
+        const sacIn = inputByLabel(apont, /^Sacador$/i);
+        let apId = apIn && apIn.initialSelection && apIn.initialSelection[0] && apIn.initialSelection[0].value;
+        let origem = 'Apresentante do ato';
+        if (!apId) { apId = sacIn && sacIn.initialSelection && sacIn.initialSelection[0] && sacIn.initialSelection[0].value; origem = 'Sacador (conferir)'; }
+        if (!apId) throw new Error('ato sem Apresentante e sem Sacador');
+        const avisos = [];
+        const fez = await ensureApresentanteServico(prot.id, apId, (m) => avisos.push(m));
+        if (apIn && !(apIn.initialSelection || []).length) await setRole(apont, apIn, [apId], (m) => avisos.push(m));
+        linha.msg = (fez ? `incluído (${origem})` : 'já tinha') + (avisos.length ? ' — ' + avisos.join(' ') : '');
+      } catch (e) { linha.msg = 'ERRO: ' + e.message; }
+      log(`${linha.code}: ${linha.msg}`);
+      out.push(linha);
+    }
+    return out;
+  }
+
   async function createProtocol(apresentanteId) {
     const cp = await getCreatePage();
     const page = await inertiaSend('POST', cp.storeUrl, {
-      process_type_roles: { [cp.roleApresentante]: [apresentanteId] },
+      // formato do formulário de criação: { <papel>: { id: <papel>, profiles: [<perfil>] } }
+      process_type_roles: { [cp.roleApresentante]: { id: cp.roleApresentante, profiles: [apresentanteId] } },
       allow_empty_presenters: false,
     });
     const pd = page.props && page.props.protocol && page.props.protocol.data;
@@ -435,16 +499,33 @@
     for (const d of t.devedores || []) devIds.push(await ensurePessoa(d, ctx, warn));
     if (!devIds.length) throw new Error('Ficha sem devedor.');
 
-    log('• Criando serviço Protesto…');
-    const prot = await createProtocol(apId);
+    const anterior = (ctx.store.feitos || {})[tituloKey(ficha, t)];
+    let prot;
+    if (anterior && anterior.id) {
+      log(`• Completando o serviço já aberto ${anterior.code || anterior.id}…`);
+      prot = { id: anterior.id, code: anterior.code };
+    } else {
+      log('• Criando serviço Protesto…');
+      prot = await createProtocol(apId);
+    }
     res.protocolo = { id: prot.id, code: prot.code, link: `${BASE}/admin/manager/v2/protocol/${prot.id}` };
     log(`  serviço ${prot.code || prot.id}`);
     ctx.store.feitos[tituloKey(ficha, t)] = res.protocolo; saveStore(ctx.store);
+
+    try {
+      if (await ensureApresentanteServico(prot.id, apId, warn)) warn('Apresentante do serviço estava vazio: incluído.');
+    } catch (e) { warn('Não conferi o apresentante do serviço: ' + e.message); }
 
     log('• Partes dos atos…');
     let procs = await getProcesses(prot.id);
     const apont = procs.find((p) => inputByLabel(p, /Apontamento do Tabelionato/i)) || procs.find((p) => /^Apontamento/i.test(p.processType.name));
     if (!apont) throw new Error('Não achei o ato de Apontamento no serviço.');
+    // Rede de segurança: garante o Apresentante no ato de apontamento.
+    const apr = inputByLabel(apont, /^Apresentante$/i);
+    if (apr) {
+      const tinha = (apr.initialSelection || []).some((s) => s.value === apId);
+      if (!tinha) { await setRole(apont, apr, [apId], warn); warn('Apresentante não veio da criação do serviço: incluído no ato de apontamento. Conferir o Apresentante do serviço.'); }
+    } else warn('Ato de apontamento sem papel Apresentante');
     const ced = inputByLabel(apont, /^Cedente$/i); if (ced) await setRole(apont, ced, [cedId], warn); else warn('Ato de apontamento sem papel Cedente');
     const sac = inputByLabel(apont, /^Sacador$/i); if (sac) await setRole(apont, sac, [sacId], warn); else warn('Ato de apontamento sem papel Sacador');
     const dev = inputByLabel(apont, /^Devedor/i); if (dev) await setRole(apont, dev, devIds, warn); else warn('Ato de apontamento sem papel Devedor');
@@ -463,22 +544,34 @@
     const tmpId = tmpIn && tmpIn.initialSelection && tmpIn.initialSelection[0] && tmpIn.initialSelection[0].value;
     if (!tmpId) throw new Error('Não achei o perfil temporário do apontamento.');
     const docs = await profileDocs(tmpId);
+    let tituloOk = true;
     if (docs.some((d) => d.document_type.id === CFG.docTitulo)) warn('O apontamento já tinha um Título Apresentado: não criei outro.');
     else {
       const tt = t.titulo;
       if (!tt.praca) warn(`Praça de pagamento não informada: usada ${CFG.cidadeServentia}.`);
-      await createDocument(tmpId, CFG.docTitulo, {
-        especie_titulo_apresentado: { sigla: tt.especie_sigla, texto: tt.especie_texto },
-        numero_titulo: tt.numero,
-        nosso_numero: tt.nosso_numero,
-        data_emissao: tt.data_emissao,
-        data_vencimento: tt.data_vencimento,
-        valor: tt.valor,
-        saldo: tt.saldo != null ? tt.saldo : tt.valor,
-        praca_protesto: tt.praca || CFG.cidadeServentia,
-        data_apresentacao: tt.data_apresentacao || ctx.hoje,
-      }, warn);
+      const venc = vencimentoDe(tt, warn);
+      try {
+        await createDocument(tmpId, CFG.docTitulo, {
+          especie_titulo_apresentado: { sigla: tt.especie_sigla, texto: tt.especie_texto },
+          numero_titulo: tt.numero,
+          nosso_numero: tt.nosso_numero,
+          data_emissao: tt.data_emissao,
+          data_vencimento: venc,
+          valor: tt.valor,
+          saldo: tt.saldo != null ? tt.saldo : tt.valor,
+          praca_protesto: tt.praca || CFG.cidadeServentia,
+          data_apresentacao: tt.data_apresentacao || ctx.hoje,
+        }, warn);
+      } catch (e) {
+        tituloOk = false;
+        warn('TÍTULO NÃO GRAVADO — cadastrar à mão no apontamento: ' + e.message);
+      }
     }
+
+    log('• Documentos das partes nos atos…');
+    const hints = [apresentante, sacador, cedente, ...(t.devedores || [])].map((p) => p && p.endereco && p.endereco.rua).filter(Boolean);
+    const pend = await vincularDocumentos(await getProcesses(prot.id), hints, warn, log);
+    res.pendencias = pend;
 
     if (ctx.pdfBytes && ctx.anexarPdf) {
       log('• Requerimento (PDF)…');
@@ -488,8 +581,56 @@
       } catch (e) { warn('PDF não anexado: ' + e.message); }
     }
 
-    res.ok = true;
+    res.ok = tituloOk && !pend.length;
+    if (!res.ok) res.erro = !tituloOk ? 'Título Apresentado não gravado' : `${pend.length} documento(s) obrigatório(s) sem vínculo`;
     return res;
+  }
+
+  // Vencimento "à vista": o cartório lança a data de emissão (como nas CDAs).
+  function vencimentoDe(tt, warn) {
+    if (tt.data_vencimento) return tt.data_vencimento;
+    if (tt.vencimento_a_vista || /vista/i.test(String(tt.vencimento_texto || ''))) {
+      if (tt.data_emissao) { warn(`Vencimento à vista: lançada a data de emissão (${dbr(tt.data_emissao)}). Conferir.`); return tt.data_emissao; }
+    }
+    if (tt.data_emissao) { warn(`Título sem vencimento: lançada a data de emissão (${dbr(tt.data_emissao)}). Conferir.`); return tt.data_emissao; }
+    return '';
+  }
+
+  // Seleciona, em cada ato e parte, o documento obrigatório que ainda não está vinculado
+  // (endereço, título etc.). Sem isso o NoCartório recusa o registro do ato.
+  async function vincularDocumentos(procs, hints, warn, log) {
+    const pend = [];
+    const nh = hints.map((h) => norm(h).slice(0, 12)).filter(Boolean);
+    for (const proc of procs) {
+      let parts = [];
+      try {
+        const ed = await inertiaGet(`${BASE}/admin/manager/v2/process/${proc.id}/edit`);
+        parts = (ed.props.layout && ed.props.layout.parts) || [];
+      } catch (e) { warn(`${proc.processType.name}: não li as partes (${e.message})`); continue; }
+      for (const part of parts) {
+        let items = [];
+        try { items = (await apiGet(`${BASE}/api/process/${proc.id}/part/${part.partId}/documents`)).items || []; } catch (e) { warn(`${part.role}: documentos não lidos (${e.message})`); continue; }
+        for (const it of items) {
+          const req = (it.settings || []).some((s) => Number(s.isRequired) === 1) || (it.partDocument && it.partDocument.isRequired);
+          if (!req || it.currentDocument || it.waivedDocument) continue;
+          const dt = it.documentType;
+          const quem = `${proc.processType.name.replace(/\s*\(.*\)$/, '')} › ${part.role} (${String(part.name).slice(0, 40)})`;
+          let cands = [];
+          try { cands = (await apiGet(`${BASE}/api/process/${proc.id}/part/${part.partId}/document-type/${dt.id}/search`)).data || []; } catch (e) { /* */ }
+          if (!cands.length) { pend.push(`${quem}: ${dt.name}`); warn(`${quem}: não há ${dt.name} no cadastro — cadastrar e selecionar`); continue; }
+          let escolha = cands.find((c) => nh.some((h) => norm(c.value || c.label || c.name).includes(h)));
+          if (!escolha) {
+            escolha = cands[0];
+            if (cands.length > 1) warn(`${quem}: ${dt.name} — escolhido "${escolha.value || escolha.label}" entre ${cands.length}. Conferir.`);
+          }
+          try {
+            await apiPost(`${BASE}/api/process/${proc.id}/part/${part.partId}/document-type/${dt.id}/attach`, { document_id: escolha.id });
+            log(`  ${quem}: ${dt.name} ✓`);
+          } catch (e) { pend.push(`${quem}: ${dt.name}`); warn(`${quem}: não vinculei ${dt.name} (${e.message})`); }
+        }
+      }
+    }
+    return pend;
   }
 
   // ---------------------------------------------------------------- conferência (só leitura)
@@ -521,7 +662,8 @@
         const praca = await resolveSelect(fCid, t.titulo.praca || CFG.cidadeServentia);
         row.praca = praca ? praca.name : null;
         if (!praca) row.avisos.push(`Praça "${t.titulo.praca}" não encontrada`);
-        for (const req of ['data_emissao', 'data_vencimento', 'valor']) if (t.titulo[req] == null || t.titulo[req] === '') row.avisos.push(`Título sem ${req}`);
+        for (const req of ['data_emissao', 'valor']) if (t.titulo[req] == null || t.titulo[req] === '') row.avisos.push(`Título sem ${req}`);
+        if (!t.titulo.data_vencimento) row.avisos.push(t.titulo.data_emissao ? `Sem data de vencimento${t.titulo.vencimento_a_vista ? ' (à vista)' : ''}: será lançada a data de emissão` : 'Título sem vencimento nem emissão: o NoCartório vai recusar');
       } catch (e) { row.erro = e.message; }
       rows.push(row);
     }
@@ -581,13 +723,14 @@
         <label><input type="checkbox" data-a="anexar" checked> anexar o PDF (só as páginas do título)</label>
       </div>
       <div class="row">
-        <label>Endereço do devedor: <select data-a="modo">
-          <option value="novos">cadastrar só para pessoas novas (avisar se diferente)</option>
-          <option value="sempre">cadastrar também nas pessoas existentes</option>
+        <label>Endereço das partes: <select data-a="modo">
+          <option value="diferente">cadastrar o do título quando não houver um igual</option>
+          <option value="avisar">só avisar se for diferente (pessoas novas recebem)</option>
           <option value="nunca">não cadastrar</option>
         </select></label>
         <button class="pri" data-a="conferir">Conferir ficha</button>
         ${last ? '<button data-a="ultima">Última relação</button>' : ''}
+        <button data-a="fixap" title="Inclui o apresentante do serviço nos serviços abertos pelo script que ficaram sem ele">Corrigir apresentante dos serviços abertos</button>
       </div>
       <div data-a="conf"></div>
       <div data-a="out"></div>
@@ -600,6 +743,22 @@
     $('json').onchange = async (e) => { const f = e.target.files[0]; if (f) $('txt').value = await f.text(); };
     $('pdf').onchange = async (e) => { const f = e.target.files[0]; state.pdfBytes = f ? new Uint8Array(await f.arrayBuffer()) : null; };
     if (last) $('ultima').onclick = () => renderRelacao($('out'), last.results, last.quando);
+    $('fixap').onclick = async (ev) => {
+      const feitos = Object.values(loadStore().feitos || {}).filter((p) => p && p.id);
+      const extra = prompt(`Corrigir o apresentante de ${feitos.length} serviço(s) abertos pelo script.\nSe quiser incluir outros, cole os links ou códigos UUID (um por linha). Deixe vazio para seguir.`, '');
+      if (extra === null) return;
+      const ids = new Set(feitos.map((p) => p.id));
+      const lista = [...feitos];
+      for (const m of String(extra).matchAll(/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/gi)) if (!ids.has(m[1])) { ids.add(m[1]); lista.push({ id: m[1] }); }
+      if (!lista.length) { alert('Nenhum serviço para corrigir.'); return; }
+      ev.target.disabled = true;
+      const out = $('out');
+      out.innerHTML = '<h3>Apresentante dos serviços</h3><pre class="log"></pre>';
+      const pre = out.querySelector('pre');
+      const res = await corrigirApresentantes(lista, (m) => { pre.textContent += m + '\n'; });
+      out.innerHTML = `<h3>Apresentante dos serviços</h3><table><thead><tr><th>Serviço</th><th>Resultado</th></tr></thead><tbody>${res.map((r) => `<tr><td><a href="${esc(r.link)}" target="_blank">${esc(r.code)}</a></td><td>${esc(r.msg)}</td></tr>`).join('')}</tbody></table>`;
+      ev.target.disabled = false;
+    };
     $('conferir').onclick = async () => {
       let ficha;
       try { ficha = JSON.parse($('txt').value); } catch (e) { $('conf').innerHTML = `<p class="err tag">JSON inválido: ${esc(e.message)}</p>`; return; }
@@ -622,7 +781,7 @@
       ${rows.map((r) => {
         const t = r.t.titulo || {};
         const pessoas = r.pessoas.map((p) => `${esc(p.papel)}: ${esc(p.nome)} <span class="tag ${p.existe ? 'ok' : 'novo'}">${p.existe ? 'cadastrado' : 'novo'}</span>`).join('<br>');
-        const av = [...r.avisos, ...(r.feito ? [`Já aberto antes: ${r.feito.code}`] : [])].map((a) => `<div class="warn">• ${esc(a)}</div>`).join('');
+        const av = [...r.avisos, ...(r.feito ? [`Já aberto: ${r.feito.code} — marque para COMPLETAR este serviço (não cria outro)`] : [])].map((a) => `<div class="warn">• ${esc(a)}</div>`).join('');
         return `<tr><td><input type="checkbox" data-i="${r.i}" ${r.erro || r.feito ? '' : 'checked'} ${r.erro ? 'disabled' : ''}></td>
           <td><b>${esc(r.especie || t.especie_sigla)}</b> nº ${esc(t.numero)}<br><span class="muted">nosso nº ${esc(t.nosso_numero || '—')} · ${esc(r.t.ref || '')}</span>${r.erro ? `<br><span class="tag err">${esc(r.erro)}</span>` : ''}</td>
           <td>${brl(t.valor)}${t.saldo != null && t.saldo !== t.valor ? `<br><span class="muted">saldo ${brl(t.saldo)}</span>` : ''}<br><span class="muted">emissão ${dbr(t.data_emissao)} · venc. ${dbr(t.data_vencimento)}<br>apres. ${dbr(t.data_apresentacao) || '(hoje)'} · praça ${esc(r.praca || '?')}</span></td>
@@ -718,5 +877,5 @@
   setInterval(tick, 1200);
 
   // exposto para testes no console
-  window.__ncsApontamento = { conferir, getCreatePage, searchProfileByDoc, resolveSelect, version: '0.1.0' };
+  window.__ncsApontamento = { conferir, getCreatePage, searchProfileByDoc, resolveSelect, version: '0.2.1' };
 })();

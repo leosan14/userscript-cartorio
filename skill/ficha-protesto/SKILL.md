@@ -70,6 +70,7 @@ Só entra o que está ESCRITO no documento. Não calcule, não deduza, não comp
   - `especie_sigla`: a sigla CENPROT da espécie (DMI, DSI, DM, DS, CDA, CCB, CPS, NP, CH, LC, DV, etc.); `especie_texto`: o nome escrito, se houver. O script procura a opção pela sigla.
   - `numero`, `nosso_numero`: como escritos (mantenha zeros à esquerda).
   - `data_emissao`, `data_vencimento`: aaaa-mm-dd.
+  - Vencimento "À VISTA" (comum em CDA da PGFN/SEFAZ): omita `data_vencimento` e informe `"vencimento_a_vista": true`. O script lança a data de emissão como vencimento (é o que o cartório usa nas CDAs) e avisa. Não invente outra data.
   - `valor`: valor do título. `saldo`: "Valor a Protestar" (CENPROT) ou "Saldo do título" (CRA); se não houver, omita (o script usa o valor).
   - `praca`: "Praça pagamento" / "Praça de protesto". CENPROT normalmente não traz: omita (o script usa a cidade da serventia e avisa).
   - `data_apresentacao`: CRA → "Remessa ao cartório"; CENPROT → "Gerado"; borderô → data do borderô. Se não houver, omita (o script usa a data do dia).
