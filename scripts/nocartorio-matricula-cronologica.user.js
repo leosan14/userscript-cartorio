@@ -2,7 +2,7 @@
 // @name         NoCartório – Matrícula em ordem cronológica
 // @namespace    cartorio-sja
 // @version      1.3.0
-// @description  Mostra todos os atos de uma matrícula (Registro Geral) em ordem cronológica, num texto corrido, com opção de imprimir e copiar, zoom do texto e ajuste de largura.
+// @description  Mostra todos os atos de uma matrícula (Registro Geral) em ordem cronológica, num texto corrido, com opção de imprimir e copiar e zoom estilo leitor de PDF (50%–400% e largura da folha).
 // @author       Leonardo Santos Oliveira
 // @match        https://app.nocartorio.com/*
 // @grant        none
@@ -32,9 +32,19 @@
   #${ID}-bar button:hover{background:#444}
   #${ID}-bar .${ID}-grp{display:inline-flex;align-items:center;gap:0;border:1px solid #555;border-radius:6px;overflow:hidden}
   #${ID}-bar .${ID}-grp button{border:0;border-radius:0;padding:6px 9px;min-width:30px}
-  #${ID}-bar .${ID}-grp span{padding:0 8px;min-width:64px;text-align:center;font-variant-numeric:tabular-nums;color:#ccc}
+  #${ID}-bar .${ID}-grp [data-a="zmenu"]{min-width:72px;font-variant-numeric:tabular-nums;border-left:1px solid #555;border-right:1px solid #555}
+  .${ID}-zwrap{position:relative;display:inline-flex}
+  .${ID}-menu{position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);z-index:2;min-width:190px;
+    background:#2b2b2b;border:1px solid #555;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.5);padding:6px 0;
+    font:13px system-ui,sans-serif}
+  .${ID}-menu[hidden]{display:none}
+  #${ID}-bar .${ID}-menu button{display:block;width:100%;text-align:left;border:0;border-radius:0;background:none;
+    padding:7px 14px 7px 34px;position:relative}
+  #${ID}-bar .${ID}-menu button:hover{background:#3d3d3d}
+  #${ID}-bar .${ID}-menu button.on::before{content:'✓';position:absolute;left:13px}
+  .${ID}-menu hr{border:0;border-top:1px solid #444;margin:6px 0}
   #${ID}-scroll{flex:1;overflow:auto;padding:24px 12px}
-  .${ID}-page{background:#fff;color:#000;max-width:var(--${ID}-w,800px);margin:0 auto;padding:48px 56px;box-shadow:0 2px 12px rgba(0,0,0,.4);
+  .${ID}-page{background:#fff;color:#000;max-width:var(--${ID}-w,800px);box-sizing:border-box;margin:0 auto;padding:48px 56px;box-shadow:0 2px 12px rgba(0,0,0,.4);
     font:14px/1.5 Arial,Helvetica,sans-serif;text-align:justify}
   .${ID}-page p{margin:0}
   .${ID}-txt,.${ID}-mat{zoom:var(--${ID}-z,1)}
@@ -158,16 +168,22 @@
   }
 
   // ---------- zoom e largura (lembrados neste navegador) ----------
+  // Funciona como o zoom do leitor de PDF: menu com percentuais e larguras, e lupas −/+ que andam pelos percentuais.
   const PREF_KEY = ID + '-prefs';
-  const ZOOM = { min: 0.6, max: 2.5, step: 0.1, def: 1 };
-  const LARG = { min: 500, max: 2000, step: 100, def: 800 };
-  const clamp = (v, r) => Math.min(r.max, Math.max(r.min, Math.round(Math.round(v / r.step) * r.step * 1000) / 1000));
+  const ZOOMS = [0.5, 0.75, 1, 1.25, 1.5, 2, 3, 4];
+  const LARGURAS = { padrao: ['Largura padrão', '912px'], larga: ['Largura ampla', '1300px'], janela: ['Largura da janela', 'none'] };
   function loadPrefs() {
     let p = {};
     try { p = JSON.parse(localStorage.getItem(PREF_KEY) || '{}') || {}; } catch (e) {}
-    return { z: clamp(Number(p.z) || ZOOM.def, ZOOM), w: clamp(Number(p.w) || LARG.def, LARG) };
+    const z = ZOOMS.includes(Number(p.z)) ? Number(p.z) : 1;
+    const w = LARGURAS[p.w] ? p.w : 'padrao';
+    return { z, w };
   }
   function savePrefs(p) { try { localStorage.setItem(PREF_KEY, JSON.stringify(p)); } catch (e) {} }
+  function stepZoom(z, dir) {
+    if (dir > 0) return ZOOMS.find(v => v > z + 1e-9) || ZOOMS[ZOOMS.length - 1];
+    return [...ZOOMS].reverse().find(v => v < z - 1e-9) || ZOOMS[0];
+  }
 
   // ---------- overlay ----------
   async function open() {
@@ -179,13 +195,16 @@
       <div id="${ID}-bar">
         <b>Matrícula em ordem cronológica</b>
         <span id="${ID}-info">Carregando…</span>
-        <span class="${ID}-grp" title="Tamanho do texto">
-          <button data-a="z-" title="Diminuir texto">A−</button><span data-v="z"></span><button data-a="z+" title="Aumentar texto">A+</button>
+        <span class="${ID}-zwrap">
+          <span class="${ID}-grp">
+            <button data-a="z-" title="Diminuir zoom (Ctrl + roda do mouse)">−</button><button data-a="zmenu" title="Zoom e largura" aria-haspopup="true"><span data-v="z"></span> ▾</button><button data-a="z+" title="Aumentar zoom (Ctrl + roda do mouse)">+</button>
+          </span>
+          <span class="${ID}-menu" role="menu" hidden>
+            ${Object.entries(LARGURAS).map(([k, [nome]]) => `<button data-a="w" data-w="${k}" role="menuitemradio">${nome}</button>`).join('')}
+            <hr>
+            ${ZOOMS.map(z => `<button data-a="z" data-z="${z}" role="menuitemradio">${Math.round(z * 100)}%</button>`).join('')}
+          </span>
         </span>
-        <span class="${ID}-grp" title="Largura da folha">
-          <button data-a="w-" title="Estreitar">⇥⇤</button><span data-v="w"></span><button data-a="w+" title="Alargar">⇤⇥</button>
-        </span>
-        <button data-a="zw0" title="Voltar texto e largura ao padrão">Padrão</button>
         <button data-a="ord">Inverter ordem</button>
         <button data-a="meta">Ocultar índices</button>
         <button data-a="copy">Copiar texto</button>
@@ -200,18 +219,26 @@
     const scroll = ov.querySelector('#' + ID + '-scroll');
     let asc = true, entries = [];
     const prefs = loadPrefs();
+    const menu = ov.querySelector('.' + ID + '-menu');
     const applyPrefs = () => {
       scroll.style.setProperty('--' + ID + '-z', String(prefs.z));
-      scroll.style.setProperty('--' + ID + '-w', prefs.w + 'px');
+      scroll.style.setProperty('--' + ID + '-w', LARGURAS[prefs.w][1]);
       ov.querySelector('[data-v="z"]').textContent = Math.round(prefs.z * 100) + '%';
-      ov.querySelector('[data-v="w"]').textContent = prefs.w + ' px';
-      ov.querySelector('[data-a="z-"]').disabled = prefs.z <= ZOOM.min;
-      ov.querySelector('[data-a="z+"]').disabled = prefs.z >= ZOOM.max;
-      ov.querySelector('[data-a="w-"]').disabled = prefs.w <= LARG.min;
-      ov.querySelector('[data-a="w+"]').disabled = prefs.w >= LARG.max;
+      ov.querySelector('[data-a="z-"]').disabled = prefs.z <= ZOOMS[0];
+      ov.querySelector('[data-a="z+"]').disabled = prefs.z >= ZOOMS[ZOOMS.length - 1];
+      menu.querySelectorAll('[data-z]').forEach(b => b.classList.toggle('on', Number(b.dataset.z) === prefs.z));
+      menu.querySelectorAll('[data-w]').forEach(b => b.classList.toggle('on', b.dataset.w === prefs.w));
       savePrefs(prefs);
     };
     applyPrefs();
+    const outside = ev => { if (!ev.target.closest('.' + ID + '-zwrap')) menu.hidden = true; };
+    ov.addEventListener('mousedown', outside);
+    scroll.addEventListener('wheel', ev => {
+      if (!ev.ctrlKey) return;
+      ev.preventDefault();
+      prefs.z = stepZoom(prefs.z, ev.deltaY < 0 ? 1 : -1);
+      applyPrefs();
+    }, { passive: false });
 
     const render = () => {
       scroll.innerHTML = build(entries, asc);
@@ -223,9 +250,10 @@
       if (!a) return;
       if (a === 'close') close();
       if (a === 'ord') { asc = !asc; render(); }
-      if (a === 'z-' || a === 'z+') { prefs.z = clamp(prefs.z + (a === 'z+' ? 1 : -1) * ZOOM.step, ZOOM); applyPrefs(); }
-      if (a === 'w-' || a === 'w+') { prefs.w = clamp(prefs.w + (a === 'w+' ? 1 : -1) * LARG.step, LARG); applyPrefs(); }
-      if (a === 'zw0') { prefs.z = ZOOM.def; prefs.w = LARG.def; applyPrefs(); }
+      if (a === 'zmenu') { menu.hidden = !menu.hidden; return; }
+      if (a === 'z-' || a === 'z+') { prefs.z = stepZoom(prefs.z, a === 'z+' ? 1 : -1); applyPrefs(); }
+      if (a === 'z') { prefs.z = Number(ev.target.dataset.z); menu.hidden = true; applyPrefs(); }
+      if (a === 'w') { prefs.w = ev.target.dataset.w; menu.hidden = true; applyPrefs(); }
       if (a === 'meta') {
         const on = scroll.classList.toggle(ID + '-hidemeta');
         ev.target.textContent = on ? 'Mostrar índices' : 'Ocultar índices';
@@ -282,7 +310,12 @@
     if (!ok) throw new Error('copy failed');
   }
 
-  function escKey(e) { if (e.key === 'Escape') close(); }
+  function escKey(e) {
+    if (e.key !== 'Escape') return;
+    const m = document.querySelector('#' + ID + '-ov .' + ID + '-menu');
+    if (m && !m.hidden) { m.hidden = true; return; }
+    close();
+  }
 
   function close() {
     const ov = document.getElementById(ID + '-ov');
