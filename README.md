@@ -14,6 +14,8 @@ Endereço previsto: <https://leosan14.github.io/userscript-cartorio/>
 | `scripts/*.user.js` | Os scripts. É daqui que o Tampermonkey instala e atualiza. |
 | `skill/ficha-cadastro-unificado/SKILL.md` | A skill que ensina a IA a gerar a ficha. |
 | `skill/ficha-cadastro-unificado.zip` | A mesma skill, empacotada para enviar ao Claude ou ao ChatGPT. |
+| `skill/ficha-protesto/SKILL.md` | A skill que gera a ficha de protesto (CENPROT, CRA, bancos) para o Apontamento assistido. |
+| `skill/ficha-protesto.zip` | A mesma skill, empacotada para enviar ao Claude ou ao ChatGPT. |
 | `config/trello.json` | Configuração do cartório para o script do Trello (chave de API, feriados, quadros ocultos). **Sem token.** |
 | `programas/certidao-dominial/` | `CertidaoDominial.exe` e o `config.json` original (textos padrão, que também vão embutidos no `.exe`). |
 | `programas/assistente-cnib/` | `AssistenteCNIB.exe` (uso diário) e `AssistenteCNIB-Admin.exe` (TI: credenciais e comandos). |

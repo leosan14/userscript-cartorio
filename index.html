@@ -239,6 +239,18 @@
           </div>
         </article>
 
+        <article class="card" id="apontamento">
+          <div class="card-top"><span class="tag">Protesto</span><span class="ver" data-version="nocartorio-apontamento-assistido.user.js"></span></div>
+          <h3>Apontamento assistido</h3>
+          <p>Recebe a ficha que a IA gera das solicitações de protesto (CENPROT, CRA, bancos) e abre um serviço Protesto por título, com as partes e o Título Apresentado já preenchidos.</p>
+          <p class="where"><b>Onde aparece</b> Em <span class="ui">Abrir um serviço › Tabelionato de Protesto</span>, botão laranja <span class="ui">Apontamento assistido</span> no canto inferior esquerdo.</p>
+          <p class="needs">Precisa da skill <b>ficha-protesto</b> na IA. O passo a passo está em <b>Como usar</b>.</p>
+          <div class="actions">
+            <a class="btn primary" href="scripts/nocartorio-apontamento-assistido.user.js">Instalar</a>
+            <button type="button" class="btn" data-guide="guia-apontamento">Como usar</button>
+          </div>
+        </article>
+
         <article class="card" id="reimagined">
           <div class="card-top"><span class="tag">Aparência</span><span class="ver" data-version="nocartorio-reimagined.user.js"></span></div>
           <h3>NoCartório Reimagined</h3>
@@ -791,6 +803,7 @@
       <li>
         <h3>Use a barra do topo</h3>
         <ul>
+          <li>O zoom funciona como no leitor de PDF: <span class="ui">−</span> e <span class="ui">+</span> (ou <kbd>Ctrl</kbd> + roda do mouse) mudam o tamanho do texto, e o menu do percentual traz de 50% a 400% e a largura da folha (padrão, ampla ou largura da janela). A escolha fica guardada neste navegador.</li>
           <li><span class="ui">Inverter ordem</span> mostra do mais recente ao mais antigo.</li>
           <li><span class="ui">Ocultar índices</span> tira as linhas cinzas de identificação e deixa só o texto dos atos.</li>
           <li><span class="ui">Copiar texto</span> copia com a formatação, pronto para colar no Word.</li>
@@ -939,6 +952,114 @@
       <li>A busca por número do título é lenta na primeira vez, porque o script precisa abrir os documentos de cada apontamento. O que ele lê fica guardado neste navegador por 7 dias, e as buscas seguintes ficam rápidas.</li>
       <li>Resultado parece desatualizado? <span class="ui">Limpar cache</span> apaga o que foi guardado.</li>
       <li>O script só consulta. Nada é alterado nos apontamentos.</li>
+    </ul>
+  </div>
+</dialog>
+
+<dialog class="guide" id="guia-apontamento" aria-labelledby="t-apontamento">
+  <header class="g-h">
+    <div><p class="g-kicker">Como usar e instalar a skill</p><h2 id="t-apontamento">Apontamento assistido</h2></div>
+    <button type="button" class="g-x" data-close aria-label="Fechar">✕</button>
+  </header>
+  <div class="g-b">
+    <p class="g-lead">A IA lê as solicitações de protesto e devolve uma <b>ficha</b> em JSON com os títulos e as pessoas. Você cola a ficha no NoCartório e o script abre um serviço <b>Protesto</b> por título, já com as partes e o Título Apresentado. Selos e pagamento continuam com você.</p>
+
+    <div class="g-flow" aria-label="Resumo do fluxo">
+      <span>PDF CENPROT / CRA</span><i>→</i><span>IA com a skill</span><i>→</i><span>Ficha</span><i>→</i><span>Apontamento assistido</span><i>→</i><span>Serviços abertos</span>
+    </div>
+
+    <h3 class="g-part"><span>Parte A</span> Instale o script</h3>
+    <p class="g-actions">
+      <a class="btn" href="scripts/nocartorio-apontamento-assistido.user.js">Instalar Apontamento assistido</a>
+    </p>
+
+    <h3 class="g-part"><span>Parte B</span> Instale a skill na IA</h3>
+    <p>A skill <b>ficha-protesto</b> ensina a IA a montar a ficha no formato que o script entende. Instala-se uma vez por conta, do mesmo jeito que a skill da Ficha no cadastro unificado.</p>
+    <p class="note">As solicitações têm dados pessoais dos devedores. Use a conta de IA que o cartório autorizou para esse tipo de documento.</p>
+
+    <details class="acc" open>
+      <summary>No Claude <span class="opt">recomendado</span></summary>
+      <ol class="steps">
+        <li>
+          <h3>Baixe a skill</h3>
+          <p>Guarde o arquivo <code>.zip</code> como veio. Não precisa descompactar.</p>
+          <p><a class="btn primary" href="skill/ficha-protesto.zip" download>Baixar a skill (.zip)</a></p>
+        </li>
+        <li>
+          <h3>Confirme que a criação de arquivos está ligada</h3>
+          <p>Em <a href="https://claude.ai" target="_blank" rel="noopener">claude.ai</a>, abra <span class="ui">Settings</span> › <span class="ui">Capabilities</span> e confira se <span class="ui">Code execution and file creation</span> (ou <span class="ui">Create and edit files</span>) está ligada.</p>
+        </li>
+        <li>
+          <h3>Envie o arquivo</h3>
+          <p>No menu lateral, <span class="ui">Customize</span> › <span class="ui">Skills</span> › <span class="ui">+</span> › <span class="ui">+ Create skill</span> › <span class="ui">Upload a skill</span>, e selecione o <code>.zip</code>.</p>
+        </li>
+        <li>
+          <h3>Confira</h3>
+          <p>A skill <b>ficha-protesto</b> aparece na lista com a chave ligada.</p>
+        </li>
+      </ol>
+    </details>
+
+    <details class="acc">
+      <summary>No ChatGPT</summary>
+      <p>Abra <span class="ui">Skills</span> › <span class="ui">Create</span> › <span class="ui">Upload from your computer</span> e envie o mesmo arquivo.</p>
+      <p><a class="btn" href="skill/ficha-protesto.zip" download>Baixar a skill (.zip)</a></p>
+    </details>
+
+    <details class="acc">
+      <summary>Em outras IAs (Gemini, Copilot…) ou se o envio não funcionar</summary>
+      <ol class="steps">
+        <li>
+          <h3>Copie as instruções</h3>
+          <p>
+            <button type="button" class="btn primary" data-copy-src="skill/ficha-protesto/SKILL.md" data-copy-label="Instruções copiadas">Copiar as instruções da skill</button>
+            <a class="btn" href="skill/ficha-protesto/SKILL.md" download="ficha-protesto.md">Baixar como arquivo</a>
+          </p>
+          <div class="copy-fallback" hidden></div>
+        </li>
+        <li>
+          <h3>Cole onde a IA guarda instruções</h3>
+          <p>Num Gem (Gemini), Projeto ou GPT (ChatGPT), ou no começo da conversa, e peça: “siga estas instruções para gerar a ficha de protesto”.</p>
+        </li>
+      </ol>
+    </details>
+
+    <h3 class="g-part"><span>Parte C</span> No dia a dia</h3>
+    <ol class="steps">
+      <li>
+        <h3>Peça a ficha à IA</h3>
+        <p>Anexe o PDF da CENPROT, o encaminhamento da CRA ou o borderô do banco e peça:</p>
+        <p class="say">gera a ficha de protesto</p>
+        <p>Um PDF com vários títulos vira uma ficha só, com um item por título. Leia o resumo que vem embaixo: ele traz os avisos (dados divergentes, apresentante ausente, CPF inválido).</p>
+      </li>
+      <li>
+        <h3>Abra o Apontamento assistido</h3>
+        <p>No NoCartório, vá em <span class="ui">Abrir um serviço › Tabelionato de Protesto</span> e clique no botão laranja <span class="ui">Apontamento assistido</span>, no canto inferior esquerdo.</p>
+      </li>
+      <li>
+        <h3>Cole a ficha e, se quiser, o PDF</h3>
+        <p>Cole o JSON (ou abra o arquivo <code>.json</code>). O PDF original é opcional: se escolhido, cada serviço recebe como Requerimento só as páginas do seu título. Escolha também o que fazer com o endereço do devedor.</p>
+      </li>
+      <li>
+        <h3>Confira</h3>
+        <p>Clique em <span class="ui">Conferir ficha</span>. Nada é gravado nesta etapa: o script mostra cada título, quem já tem cadastro e quem é novo, e os avisos. Para pessoa física nova, escolha o sexo (obrigatório no cadastro do CPF). Desmarque os títulos que não quiser abrir.</p>
+      </li>
+      <li>
+        <h3>Abra os serviços</h3>
+        <p>Clique em <span class="ui">Abrir serviços marcados</span> e confirme. Para cada título o script cadastra as pessoas que faltam, cria o serviço Protesto, inclui Apresentante, Cedente, Sacador e Devedor(es) e cadastra o Título Apresentado para Protesto no apontamento.</p>
+      </li>
+      <li>
+        <h3>Use a relação título × serviço</h3>
+        <p>No fim aparece a relação com o código e o link de cada serviço. <span class="ui">Copiar relação</span> leva para planilha ou e-mail; <span class="ui">Baixar CSV</span> salva o arquivo. Confira cada serviço, registre o pagamento e gere os selos manualmente.</p>
+      </li>
+    </ol>
+
+    <h3 class="g-sub">Bom saber</h3>
+    <ul class="g-list">
+      <li>Nada é selado nem pago pelo script.</li>
+      <li>Título já aberto antes neste navegador aparece com o aviso “Já aberto antes” e vem desmarcado, para não duplicar.</li>
+      <li>A última relação fica guardada neste navegador: o botão <span class="ui">Última relação</span> a mostra de novo.</li>
+      <li>Se o NoCartório for atualizado no meio do uso, o script pede para recarregar a página (<kbd>F5</kbd>).</li>
     </ul>
   </div>
 </dialog>
