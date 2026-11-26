@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         NoCartório — Busca Avançada Livro 3 (Registro Auxiliar)
 // @namespace    https://github.com/leonardo/nocartorio-livro3
-// @version      1.0.0
+// @version      1.1.0
 // @description  Busca no Livro 3 (Registro Auxiliar) por nome, CPF/CNPJ, produto, safra, número do registro e título, com extração automática dos dados dos registros.
 // @author       Leonardo
-// @match        https://app.nocartorio.com/admin/manager/v2/ri-auxiliary-registry-book*
+// @match        https://app.nocartorio.com/*
 // @grant        none
 // @run-at       document-idle
 // @noframes
@@ -23,7 +23,8 @@
   const BOOK_PATH = '/admin/manager/v2/ri-auxiliary-registry-book';
   const BASE_URL = location.origin + BOOK_PATH;
   const LS_KEY = 'nc3-busca-avancada:v1';
-  const SCRIPT_VERSION = '1.0.0';
+  const SCRIPT_VERSION = '1.1.0';
+  const CACHE_TTL_MS = 2 * 60 * 1000; // resultados guardados só para paginar; nova busca consulta de novo
 
   const PRODUCT_SUGGESTIONS = [
     'SOJA', 'MILHO', 'SORGO', 'FEIJÃO', 'ALGODÃO', 'CAFÉ', 'ARROZ', 'TRIGO',
@@ -566,6 +567,14 @@
       }
     } catch (error) { /* ignore */ }
 
+    try {
+      const app = document.querySelector('#app[data-page]');
+      if (app) {
+        const page = JSON.parse(app.getAttribute('data-page') || '{}');
+        if (page.version) return String(page.version);
+      }
+    } catch (error) { /* ignore */ }
+
     return '';
   }
 
@@ -595,7 +604,9 @@
 
   async function fetchPage(query, page, signal) {
     const key = cacheKey(query, page);
-    if (state.cache.has(key)) return state.cache.get(key);
+    const hit = state.cache.get(key);
+    if (hit && Date.now() - hit.at < CACHE_TTL_MS) return hit.value;
+    state.cache.delete(key);
 
     const url = buildUrl(query, page);
     const version = getInertiaVersion();
@@ -646,8 +657,11 @@
 
     if (contentType.includes('application/json')) {
       const payload = await response.json();
+      if (!payload || !payload.props || !payload.props.entries) {
+        throw new Error('O sistema devolveu outra página (' + ((payload && payload.component) || 'desconhecida') + '). Recarregue a página e tente novamente.');
+      }
       const normalized = normalizePayload(payload);
-      state.cache.set(key, normalized);
+      state.cache.set(key, { at: Date.now(), value: normalized });
       return normalized;
     }
 
@@ -668,8 +682,12 @@
       throw new Error('A resposta do sistema veio em um formato inesperado. Recarregue a página e tente novamente.');
     }
 
+    if (payload.props && !payload.props.entries) {
+      throw new Error('O sistema devolveu outra página (' + (payload.component || 'desconhecida') + '). Recarregue a página e tente novamente.');
+    }
+
     const normalized = normalizePayload(payload);
-    state.cache.set(key, normalized);
+    state.cache.set(key, { at: Date.now(), value: normalized });
     return normalized;
   }
 
@@ -698,10 +716,21 @@
     if (values.safra) terms.push(normalizeSafra(values.safra));
     if (values.titulo) terms.push(values.titulo);
 
-    return {
+    const query = {
       q: terms.join(' ').replace(/\s+/g, ' ').trim(),
       registry: values.registro || ''
     };
+
+    // O texto dos registros traz o CPF/CNPJ com pontuação. Se a busca só com
+    // dígitos não achar nada, tenta de novo com o número formatado.
+    const digits = onlyDigits(values.doc);
+    if (digits.length === 11 || digits.length === 14) {
+      const formatted = digits.length === 11 ? formatCpf(digits) : formatCnpj(digits);
+      const altTerms = terms.map((term) => (term === digits ? formatted : term));
+      query.alt = { q: altTerms.join(' ').replace(/\s+/g, ' ').trim(), registry: query.registry };
+    }
+
+    return query;
   }
 
   function nativeUrlFor(query) {
@@ -737,8 +766,16 @@
     const nome = checkField('Nome', partyNames, fields.nome, parsed.text, false);
     if (nome) checks.push(nome);
 
-    const doc = checkField('CPF/CNPJ', partyDocs, fields.doc, parsed.text, false);
-    if (doc) checks.push(doc);
+    const docDigits = onlyDigits(fields.doc);
+    if (docDigits.length === 11 || docDigits.length === 14) {
+      // Compara só os dígitos: "123.456.789-00" e "12345678900" são o mesmo CPF.
+      const inParties = parsed.docs.some((d) => d.digits === docDigits);
+      const inText = inParties || extractDocs(parsed.text).some((d) => d.digits === docDigits);
+      checks.push({ label: 'CPF/CNPJ', state: inParties ? 'ok' : inText ? 'warn' : 'miss' });
+    } else {
+      const doc = checkField('CPF/CNPJ', partyDocs, fields.doc, parsed.text, false);
+      if (doc) checks.push(doc);
+    }
 
     const produto = checkField('Produto', parsed.produto.join(' | '), fields.produto, parsed.text, true);
     if (produto) checks.push(produto);
@@ -1233,18 +1270,42 @@
         transition: background .15s ease, border-color .15s ease;
       }
       #nc3-launcher:hover { background: var(--accent, #f1f5f9); }
+      #nc3-launcher.nc3-floating {
+        position: fixed; right: 20px; bottom: 20px; z-index: 2147482000;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, .18);
+      }
       #nc3-launcher svg { width: 14px; height: 14px; flex: 0 0 auto; }
       @media (max-width: 640px) { #nc3-launcher span { display: none; } }
     `;
     document.head.appendChild(style);
   }
 
+  let routeEnteredAt = Date.now();
+
+  function placeLauncher(button, section) {
+    const buttons = Array.from(section.querySelectorAll('button'));
+    const buscar = buttons.find((item) => /^buscar$/i.test((item.textContent || '').trim()));
+    if (buscar && buscar.parentElement) buscar.parentElement.appendChild(button);
+    else section.appendChild(button);
+  }
+
   function injectLauncher() {
     if (!isListPage()) return;
-    if (document.getElementById('nc3-launcher')) return;
 
     const section = document.querySelector('section[aria-label^="Filtros"]');
-    if (!section) return;
+    const existing = document.getElementById('nc3-launcher');
+    if (existing) {
+      // Botão flutuante provisório: passa para a barra de filtros quando ela surgir.
+      if (section && existing.classList.contains('nc3-floating')) {
+        existing.classList.remove('nc3-floating');
+        placeLauncher(existing, section);
+      }
+      return;
+    }
+
+    // Sem a barra de filtros (layout mudou ou ainda carregando): depois de um
+    // tempo, mostra um botão flutuante para a busca continuar acessível.
+    if (!section && Date.now() - routeEnteredAt < 1500) return;
 
     ensureLauncherStyle();
 
@@ -1263,10 +1324,12 @@
     `;
     button.addEventListener('click', () => openDialog());
 
-    const buttons = Array.from(section.querySelectorAll('button'));
-    const buscar = buttons.find((item) => /^buscar$/i.test((item.textContent || '').trim()));
-    if (buscar && buscar.parentElement) buscar.parentElement.appendChild(button);
-    else section.appendChild(button);
+    if (section) {
+      placeLauncher(button, section);
+    } else {
+      button.classList.add('nc3-floating');
+      document.body.appendChild(button);
+    }
   }
 
   function ensureHost() {
@@ -1393,13 +1456,31 @@
       }
     });
 
-    document.addEventListener('popstate', () => {
-      if (location.pathname !== state.lastPath) {
-        state.lastPath = location.pathname;
-        if (!isListPage() && state.open) closeDialog();
-        scheduleLauncherCheck();
-      }
+    // popstate é disparado em window (não em document). pushState/replaceState
+    // não disparam evento algum: são envolvidos para acompanhar a navegação do
+    // Inertia sem precisar de F5.
+    window.addEventListener('popstate', onRouteChange);
+    ['pushState', 'replaceState'].forEach((method) => {
+      const original = history[method];
+      if (typeof original !== 'function' || original.__nc3Wrapped) return;
+      const wrapped = function () {
+        const result = original.apply(this, arguments);
+        onRouteChange();
+        return result;
+      };
+      wrapped.__nc3Wrapped = true;
+      try { history[method] = wrapped; } catch (error) { /* ignore */ }
     });
+  }
+
+  function onRouteChange() {
+    if (location.pathname !== state.lastPath) {
+      state.lastPath = location.pathname;
+      routeEnteredAt = Date.now();
+      if (!isListPage() && state.open) closeDialog();
+      setTimeout(scheduleLauncherCheck, 1600);
+    }
+    scheduleLauncherCheck();
   }
 
   function openDialog() {
@@ -1484,6 +1565,8 @@
    * ------------------------------------------------------------------ */
 
   function runSearch(page) {
+    // Uma busca nova sempre consulta o sistema: registros recém-lavrados aparecem.
+    state.cache.clear();
     const values = readFormValues();
     const query = composeQuery(values);
     state.fields = values;
@@ -1507,8 +1590,19 @@
     renderLoading();
 
     try {
-      const result = await fetchPage(query, page || 1, controller.signal);
+      let result = await fetchPage(query, page || 1, controller.signal);
       if (controller.signal.aborted) return;
+
+      if (result.data.length === 0 && query.alt && (page || 1) === 1) {
+        const altResult = await fetchPage(query.alt, 1, controller.signal);
+        if (controller.signal.aborted) return;
+        if (altResult.data.length > 0) {
+          result = altResult;
+          query = query.alt;
+          state.query = query;
+          updateQueryDisplay(query);
+        }
+      }
 
       state.result = result;
       state.parsed = result.data.map(parseEntry);
@@ -1906,6 +2000,7 @@
       if (!isListPage()) {
         const existing = document.getElementById('nc3-launcher');
         if (existing) existing.remove();
+        if (state.open) closeDialog();
         return;
       }
       injectLauncher();
@@ -1913,6 +2008,8 @@
   }
 
   function init() {
+    if (window.__nc3BuscaAvancadaInit) return;
+    window.__nc3BuscaAvancadaInit = true;
     bindGlobalEvents();
 
     if (isListPage()) injectLauncher();
@@ -1921,6 +2018,7 @@
     observer.observe(document.documentElement, { childList: true, subtree: true });
 
     scheduleLauncherCheck();
+    setTimeout(scheduleLauncherCheck, 1600);
 
     // Exponibiliza um pequeno atalho para depuração manual.
     try {

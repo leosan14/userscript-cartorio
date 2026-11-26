@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         NoCartório — Datas dos Selos
 // @namespace    https://app.nocartorio.com/
-// @version      1.0.0
+// @version      1.1.0
 // @description  Exibe, abaixo de cada selo, a data/hora de protocolo e a data/hora de registro do ato.
 // @author       Missão 2
-// @match        https://app.nocartorio.com/admin/manager/v2/protocol/*
+// @match        https://app.nocartorio.com/*
 // @run-at       document-start
 // @grant        none
 // @noframes
@@ -30,6 +30,12 @@
  *
  * Não usamos createdAt (entrada em estoque), sentAt (envio ao Tribunal),
  * initialized_at (abertura) nem qualquer data de emissão não confirmada.
+ *
+ * Carregamento: o NoCartório troca de página sem recarregar (Inertia). O
+ * script roda em todo o app desde o document-start, para já estar observando
+ * a rede quando o usuário abre um serviço a partir de outra tela (antes só
+ * funcionava com F5 na página do serviço). Se a data de protocolo não estiver
+ * no estado do Inertia (navegação SPA), ela é lida do HTML da página.
  *
  * O script apenas faz GET e mantém os dados em memória. Não lê nem guarda
  * cookies, tokens, senhas ou dados pessoais.
@@ -453,6 +459,7 @@
       lastErrorAt: 0,
       lastUpdatedAt: 0,
       warned: false,
+      pageInfo: 'idle', // idle | loading | done — leitura da data de protocolo pelo HTML
     };
 
     protocolCache.set(protocolId, state);
@@ -485,9 +492,63 @@
     const info = getProtocolInfo(state.protocolId);
     if (!info) return;
     if (info.id && info.id !== state.protocolId) return;
-    if (info.id === state.protocolId || !info.id) {
-      state.protocolRegisteredAt = info.registeredAt || null;
-    }
+    if (info.registeredAt) state.protocolRegisteredAt = info.registeredAt;
+    else if (state.pageInfo !== 'done') state.protocolRegisteredAt = null;
+  }
+
+  let routeEnteredAt = Date.now();
+
+  /**
+   * Em navegação SPA o estado do Inertia pode não trazer a data de protocolo
+   * (histórico criptografado, prop carregada depois, script inicial de outra
+   * página). Nesse caso lê uma vez o JSON da página do serviço pelo HTML.
+   */
+  function maybeFetchProtocolInfo(state) {
+    if (state.protocolRegisteredAt || state.pageInfo !== 'idle') return;
+    if (!isCurrentProtocol(state.protocolId)) return;
+    if (Date.now() - routeEnteredAt < CONFIG.routeFallbackDelayMs) return;
+    if (getDomActIds().size === 0) return;
+
+    state.pageInfo = 'loading';
+    const protocolId = state.protocolId;
+    const controller = new AbortController();
+    const timer = setTimeout(function () { controller.abort(); }, CONFIG.fetchTimeoutMs);
+
+    fetch('/admin/manager/v2/protocol/' + encodeURIComponent(protocolId), {
+      method: 'GET',
+      mode: 'same-origin',
+      credentials: 'same-origin',
+      headers: { Accept: 'text/html' },
+      signal: controller.signal,
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.text();
+      })
+      .then(function (html) {
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        const script =
+          doc.querySelector('script[data-page="app"][type="application/json"]') ||
+          doc.querySelector('script[data-page="app"]');
+        const app = !script ? doc.querySelector('#app[data-page]') : null;
+        const text = script ? script.textContent : app ? app.getAttribute('data-page') : null;
+        if (!text) return;
+        const page = JSON.parse(text);
+        const info = extractProtocolInfo(page && page.props);
+        if (!info || (info.id && info.id !== protocolId)) return;
+        if (info.registeredAt) {
+          state.protocolRegisteredAt = info.registeredAt;
+          debugLog('data de protocolo lida do HTML', protocolId);
+        }
+      })
+      .catch(function (error) {
+        debugLog('falha ao ler a data de protocolo', protocolId, error);
+      })
+      .finally(function () {
+        clearTimeout(timer);
+        state.pageInfo = 'done';
+        scheduleScan();
+      });
   }
 
   // =========================================================================
@@ -1690,6 +1751,7 @@
 
     const state = getOrCreateState(protocolId);
     refreshProtocolInfo(state);
+    maybeFetchProtocolInfo(state);
 
     const cards = new Set();
     const links = document.querySelectorAll(ACT_LINK_SELECTOR);
@@ -1731,6 +1793,7 @@
       if (newProtocolId !== currentProtocolId) {
         const oldProtocolId = currentProtocolId;
         currentProtocolId = newProtocolId;
+        routeEnteredAt = Date.now();
 
         // Cancela consulta e timer do serviço anterior.
         if (oldProtocolId) {
@@ -1766,6 +1829,8 @@
           const currentState = getOrCreateState(newProtocolId);
           refreshProtocolInfo(currentState);
           scheduleScan();
+          // Cobre o caso em que a resposta de atos da interface não foi vista.
+          maybeScheduleFallback(currentState, CONFIG.routeFallbackDelayMs);
         }, 1_500);
 
         return;
