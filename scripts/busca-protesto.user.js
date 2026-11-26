@@ -2,10 +2,10 @@
 // @name         Busca Protesto — Buscador Completo (Nocartorio)
 // @name:pt-BR   Busca Protesto — Buscador Completo (Nocartorio)
 // @namespace    https://github.com/leonardo/busca-protesto
-// @version      1.3.0
+// @version      1.3.1
 // @description  Buscador completo de protesto de títulos: busca por nome do devedor, CPF/CNPJ, número do título/nosso número e número de ordem, com exportação CSV. Para o Livro de Protocolos do Nocartorio.
 // @author       Leonardo Santos Oliveira
-// @match        https://app.nocartorio.com/admin/manager/v2/tp-protocol-book*
+// @match        https://app.nocartorio.com/*
 // @grant        GM_setValue
 // @grant        GM_getValue
 // @grant        GM_deleteValue
@@ -89,6 +89,14 @@
   /* Caches locais genéricos: entryId -> { t: timestamp, f: payload } */
   const TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 dias
 
+  function isEmptyPayload(payload) {
+    if (payload == null) return true;
+    if (Array.isArray(payload)) return payload.length === 0;
+    if (typeof payload !== 'object') return false;
+    if ('roles' in payload) return !payload.roles || !Object.values(payload.roles).some((v) => v && v.length);
+    return Object.keys(payload).length === 0;
+  }
+
   function makeCache(key, label, ttlMs = TTL_MS) {
     let data = store.get(key, {}) || {};
     let writes = 0;
@@ -103,16 +111,21 @@
       get(id) {
         const hit = data[id];
         if (!hit) return undefined;
-        if (Date.now() - hit.t > ttlMs) { delete data[id]; return undefined; }
+        // Entradas vazias gravadas por versões anteriores também são consultadas de novo.
+        if (Date.now() - hit.t > ttlMs || isEmptyPayload(hit.f)) { delete data[id]; return undefined; }
         return hit.f;
       },
       has(id) {
         const hit = data[id];
         if (!hit) return false;
-        if (Date.now() - hit.t > ttlMs) { delete data[id]; return false; }
+        if (Date.now() - hit.t > ttlMs || isEmptyPayload(hit.f)) { delete data[id]; return false; }
         return true;
       },
       put(id, payload) {
+        // Resultado vazio (título ainda não cadastrado, processo sem partes) não
+        // vai para o cache: senão o apontamento some das buscas por 7 dias,
+        // mesmo depois de completado no sistema.
+        if (isEmptyPayload(payload)) { delete data[id]; return; }
         data[id] = { t: Date.now(), f: payload };
         // Evita serializar milhares de entradas repetidamente (especialmente
         // importante no Violentmonkey, cujo storage passa pela extensão).
@@ -153,6 +166,8 @@
   let inertiaVersion = null;
 
   function versionFromDom() {
+    const app = document.querySelector('#app[data-page]');
+    if (app) { try { const v = JSON.parse(app.getAttribute('data-page')).version; if (v) return v; } catch (_) {} }
     const scripts = document.querySelectorAll('script:not([src])');
     for (const s of scripts) {
       const t = s.textContent || '';
@@ -245,6 +260,24 @@
     for (const e of all) { if (!seen.has(e.id)) { seen.add(e.id); dedup.push(e); } }
     dedup.sort((a, b) => (b.order_number || 0) - (a.order_number || 0));
     return { entries: dedup, total, truncated: lastPage > pagesToFetch, lastPage };
+  }
+
+  /** Páginas do início da lista até encontrar um apontamento já conhecido. */
+  async function fetchNewerEntries(knownIds, ctl) {
+    const fresh = [];
+    for (let page = 1; page <= 5; page++) {
+      ctl && ctl.check();
+      const pageData = await fetchEntriesPage({}, page);
+      const rows = (pageData && pageData.data) || [];
+      let hitKnown = false;
+      for (const e of rows) {
+        if (knownIds.has(e.id)) hitKnown = true;
+        else { knownIds.add(e.id); fresh.push(e); }
+      }
+      const last = pageData && pageData.meta ? pageData.meta.last_page : 1;
+      if (hitKnown || !rows.length || page >= last) break;
+    }
+    return fresh;
   }
 
   /* ---- perfis (CPF/CNPJ -> pessoa) ---- */
@@ -423,6 +456,9 @@
     ctl && ctl.check();
     // mantém apenas correspondências com o mesmo número de dígitos
     const d = digits(query);
+    // O autocomplete devolve também documentos parecidos: fica só com o mesmo número.
+    const exact = matches.filter((m) => digits(m.docLabel) === d);
+    if (exact.length) return exact;
     return matches.filter((m) => digits(m.docLabel).length === d.length);
   }
 
@@ -531,6 +567,13 @@
         if (cachedList) {
           report({ phase: 'scan', text: 'Lista completa obtida do cache local (' + cachedList.length + ' apontamentos)…' });
           candidates = cachedList.map(inflateEntry);
+          // Completa com os apontamentos feitos depois que a lista foi guardada.
+          const fresh = await fetchNewerEntries(new Set(candidates.map((e) => e.id)), ctl);
+          if (fresh.length) {
+            candidates = fresh.concat(candidates);
+            listaFullCache.put('_all', candidates.map(slimEntry));
+            listaFullCache.save();
+          }
           totalServer = candidates.length;
         } else {
           report({ phase: 'scan', text: 'Varredura completa para localizar o título (1ª vez é mais lenta)…' });
@@ -655,7 +698,7 @@
     btnEl.className = 'bp-fab';
     btnEl.title = 'Busca Protesto (Ctrl+Shift+F)';
     btnEl.innerHTML = '<span class="bp-dot"></span>&#128269;';
-    btnEl.addEventListener('click', togglePanel);
+    btnEl.addEventListener('click', () => togglePanel());
     document.body.appendChild(btnEl);
 
     // painel
@@ -749,6 +792,7 @@
 
   function togglePanel(force) {
     if (!panelEl) buildUI();
+    if (force !== false && !isListPage()) return;
     const open = force !== undefined ? force : !panelEl.classList.contains('bp-open');
     panelEl.classList.toggle('bp-open', open);
     if (open) { applyTheme(); panelEl.querySelector('#bp-term').focus(); }
@@ -953,28 +997,66 @@
   }
 
   /* ---------------- inicialização ---------------- */
+  function isListPage() {
+    const p = location.pathname.replace(/\/+$/, '');
+    return p === URL_LIST || p.startsWith(URL_LIST + '/');
+  }
+
   function onKeydown(e) {
-    if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === SHORTCUT.key) {
+    if (e.ctrlKey && e.shiftKey && (e.key || '').toLowerCase() === SHORTCUT.key) {
+      if (!isListPage()) return;
       e.preventDefault();
       togglePanel();
     }
   }
 
+  /**
+   * O NoCartório troca de página sem recarregar (Inertia). Por isso o script é
+   * carregado em todo o app e mostra/esconde o botão conforme a rota atual,
+   * em vez de depender do F5 na página do Livro de Protocolos.
+   */
+  function syncRoute() {
+    const ok = isListPage();
+    if (ok && (!btnEl || !btnEl.isConnected || !panelEl || !panelEl.isConnected)) {
+      if (btnEl) btnEl.remove();
+      if (panelEl) panelEl.remove();
+      btnEl = null; panelEl = null;
+      buildUI();
+    }
+    if (btnEl) btnEl.style.display = ok ? 'block' : 'none';
+    if (!ok && panelEl) panelEl.classList.remove('bp-open');
+    applyTheme();
+  }
+
+  let routeTimer = null;
+  function scheduleSync() {
+    if (routeTimer) return;
+    routeTimer = setTimeout(() => { routeTimer = null; syncRoute(); }, 60);
+  }
+
+  function hookHistory() {
+    for (const m of ['pushState', 'replaceState']) {
+      const orig = history[m];
+      if (typeof orig !== 'function' || orig.__bpWrapped) continue;
+      const wrapped = function () { const r = orig.apply(this, arguments); scheduleSync(); return r; };
+      wrapped.__bpWrapped = true;
+      try { history[m] = wrapped; } catch (_) {}
+    }
+    window.addEventListener('popstate', scheduleSync);
+  }
+
   function init() {
-    buildUI();
     window.addEventListener('keydown', onKeydown, true);
-    // acompanha navegação SPA para esconder/mostrar o botão
-    setInterval(() => {
-      const ok = location.pathname.startsWith(URL_LIST);
-      if (btnEl) btnEl.style.display = ok ? 'block' : 'none';
-      if (!ok && panelEl) panelEl.classList.remove('bp-open');
-      applyTheme();
-    }, 1500);
+    hookHistory();
+    syncRoute();
+    // rede de segurança: o history do contexto isolado pode não ver o pushState da página
+    setInterval(syncRoute, 1000);
   }
 
   function safeInit() {
     try {
-      if (document.querySelector('.bp-root')) return;
+      if (window.__bpBuscaProtestoInit || document.querySelector('.bp-root')) return;
+      window.__bpBuscaProtestoInit = true;
       init();
     } catch (error) {
       // Um erro de inicialização deve ser diagnosticável sem deixar uma falha
